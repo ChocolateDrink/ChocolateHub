@@ -52,7 +52,7 @@ function Maid:Clean()
 	end
 end
 
-function Maid:__index(self, index)
+function Maid.__index(self, index)
 	if Maid[index] then
 		return Maid[index]
 	else
