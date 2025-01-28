@@ -93,4 +93,6 @@ setmetatable(Maid, {
 	end
 })
 
+Maid.Destroy = Maid.Clean
+
 return Maid
