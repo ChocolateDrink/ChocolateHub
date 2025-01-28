@@ -4,8 +4,9 @@ local Maid = {}
 Maid.__index = Maid
 
 function Maid.new()
-	local self = setmetatable({}, Maid)
-	self._tasks = {}
+	local self = setmetatable({
+		_tasks = {}
+	}, Maid)
 
 	return self
 end
