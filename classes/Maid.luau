@@ -53,8 +53,8 @@ function Maid:Clean()
 end
 
 function Maid:__index(self, index)
-	if self[index] then
-		return self[index]
+	if Maid[index] then
+		return Maid[index]
 	else
 		return self._tasks[index]
 	end
