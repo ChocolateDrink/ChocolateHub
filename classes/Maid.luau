@@ -51,47 +51,45 @@ function Maid:Clean()
 	end
 end
 
-setmetatable(Maid, {
-	__index = function(self, index)
-		if self[index] then
-			return self[index]
-		else
-			return self._tasks[index]
-		end
-	end,
+function Maid:__index(self, index)
+	if self[index] then
+		return self[index]
+	else
+		return self._tasks[index]
+	end
+end
 
-	__newindex = function(self, index, value)
-		if self[index] ~= nil then
-			warn(string.format('%s is reserved', tostring(index)))
-			return
-		end
+function Maid:__newindex(index, value)
+	if Maid[index] ~= nil then
+		warn(string.format('%s is reserved', tostring(index)))
+		return
+	end
 
-		local tasks = self._tasks
-		local oldTask = tasks[index]
+	local tasks = self._tasks
+	local oldTask = tasks[index]
 
-		if oldTask == value then
-			return
-		end
+	if oldTask == value then
+		return
+	end
 
-		tasks[index] = value
+	tasks[index] = value
 
-		if oldTask then
-			if typeof(oldTask) == 'function' then
-				oldTask()
-			elseif typeof(oldTask) == 'RBXScriptConnection' then
-				oldTask:Disconnect()
-			elseif typeof(oldTask) == 'table' then
-				table.clear(oldTask)
-			elseif Signal.isSignal(oldTask) then
-				oldTask:Destroy()
-			elseif typeof(oldTask) == 'thread' then
-				task.cancel(oldTask)
-			elseif oldTask.Destroy then
-				oldTask:Destroy()
-			end
+	if oldTask then
+		if typeof(oldTask) == 'function' then
+			oldTask()
+		elseif typeof(oldTask) == 'RBXScriptConnection' then
+			oldTask:Disconnect()
+		elseif typeof(oldTask) == 'table' then
+			table.clear(oldTask)
+		elseif Signal.isSignal(oldTask) then
+			oldTask:Destroy()
+		elseif typeof(oldTask) == 'thread' then
+			task.cancel(oldTask)
+		elseif oldTask.Destroy then
+			oldTask:Destroy()
 		end
 	end
-})
+end
 
 Maid.Destroy = Maid.Clean
 
