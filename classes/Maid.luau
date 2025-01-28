@@ -38,11 +38,11 @@ function Maid:Clean()
 			value()
 		elseif typeof(value) == 'RBXScriptConnection' then
 			value:Disconnect()
-		elseif (Signal.isSignal(value)) then
+		elseif Signal.isSignal(value) then
 			value:Destroy()
 		elseif typeof(value) == 'table' then
 			table.clear(value)
-		elseif (typeof(value) == 'thread') then
+		elseif typeof(value) == 'thread' then
 			task.cancel(value)
 		elseif value.Destroy then
 			value:Destroy()
@@ -82,9 +82,9 @@ setmetatable(Maid, {
 				oldTask:Disconnect()
 			elseif typeof(oldTask) == 'table' then
 				table.clear(oldTask)
-			elseif (Signal.isSignal(oldTask)) then
+			elseif Signal.isSignal(oldTask) then
 				oldTask:Destroy()
-			elseif (typeof(oldTask) == 'thread') then
+			elseif typeof(oldTask) == 'thread' then
 				task.cancel(oldTask)
 			elseif oldTask.Destroy then
 				oldTask:Destroy()
