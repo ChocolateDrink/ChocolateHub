@@ -1,5 +1,3 @@
-print('testing on local 2')
-
 local main = library:AddTab('Main')
 local misc = library:AddTab('Misc')
 
