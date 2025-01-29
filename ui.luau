@@ -3209,7 +3209,7 @@ do
 				library.options.configList:SetValue(library.loadedConfig or 'default')
 			end)
 		else
-			warn('[Library] [Config Loader] An error has occured', configData)
+			warn('[library] [config loader] an error has occured', configData)
 		end
 
 		self:selectTab(self.tabs[1])
@@ -3273,7 +3273,7 @@ do
 			maid:Destroy()
 		end)
 
-		local settingsTab = library:AddTab('settings', 100)
+		local settingsTab = library:AddTab('Settings', 100)
 		local settingsColumn = settingsTab:AddColumn()
 		local settingsColumn1 = settingsTab:AddColumn()
 		local settingsMain = settingsColumn:AddSection('Main')
@@ -3290,7 +3290,7 @@ do
 
 		task.spawn(function()
 			local BackgroundArray = {}
-			local ContentProvider = cloneref(game:GetService('ContentProvider'))
+			local ContentProvider = Service:Get('ContentProvider')
 
 			for _, v in next, Backgrounds do
 				table.insert(BackgroundArray, 'rbxassetid://' .. v)
@@ -3536,7 +3536,7 @@ do
 			library:UpdateConfig()
 		end
 
-		local GuiService = cloneref(game:GetService('GuiService'))
+		local GuiService = Service:Get('GuiService')
 		library.unloadMaid:GiveTask(GuiService.NativeClose:Connect(saveConfigBeforeGameLeave))
 		library.unloadMaid:GiveTask(GuiService.MenuOpened:Connect(saveConfigBeforeGameLeave))
 
@@ -3554,6 +3554,6 @@ do
 	end
 end
 
-printf(string.format('[Library] Loaded in %.02f seconds', tick() - started))
+printf('[library] loaded in %.02f seconds', tick() - started)
 
 return library
