@@ -1,8 +1,5 @@
 local main = library:AddTab('Main')
-local misc = library:AddTab('Misc')
-
 local main1, main2 = main:AddColumn(), main:AddColumn()
-local misc1, misc2 = misc:AddColumn(), misc:AddColumn()
 
 local Service = fetch('classes/Service')
 local Maid = fetch('classes/Maid')
