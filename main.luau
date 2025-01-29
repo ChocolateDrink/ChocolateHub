@@ -16,7 +16,7 @@ if not gameName then
 end
 
 -- // these games require signal fix
-local shitGames = {'sls'}
+local shitGames = {'sls', 'cb'}
 _G.sigFix = table.find(shitGames, getShortName(gameName))
 
 local library = fetch('ui')
