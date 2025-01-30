@@ -6,7 +6,7 @@ local inputService = cloneref(game:GetService('UserInputService'))
 
 local localPlayer = players.localPlayer
 
-local entity = fetch('utils/eneity')
+local entity = fetch('utils/entity')
 
 local Maid = fetch('classes/Maid')
 local maid = Maid.new()
