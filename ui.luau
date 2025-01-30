@@ -2197,7 +2197,7 @@ do
 					option.callback = typeof(option.callback) == 'function' and option.callback or function() end
 					option.type = 'toggle'
 					option.position = #self.options
-					option.flag = (library.flagprefix or '') .. toCamelCase(option.flag or option.text)
+					option.flag = toCamelCase(option.flag or option.text)
 					option.subcount = 0
 					option.tip = option.tip and tostring(option.tip)
 					option.style = option.style == 2
@@ -2257,7 +2257,7 @@ do
 					option.callback = typeof(option.callback) == 'function' and option.callback or function() end
 					option.type = 'button'
 					option.position = #self.options
-					option.flag = (library.flagprefix or '') .. toCamelCase(option.flag or option.text)
+					option.flag = toCamelCase(option.flag or option.text)
 					option.subcount = 0
 					option.tip = option.tip and tostring(option.tip)
 					table.insert(self.options, option)
@@ -2316,7 +2316,7 @@ do
 					option.callback = typeof(option.callback) == 'function' and option.callback or function() end
 					option.type = 'bind'
 					option.position = #self.options
-					option.flag = (library.flagprefix or '') .. toCamelCase(option.flag or option.text)
+					option.flag = toCamelCase(option.flag or option.text)
 					option.tip = option.tip and tostring(option.tip)
 					table.insert(self.options, option)
 					library.options[option.flag] = option
@@ -2344,7 +2344,7 @@ do
 					option.textpos = option.textpos == 2
 					option.type = 'slider'
 					option.position = #self.options
-					option.flag = (library.flagprefix or '') .. toCamelCase(option.flag or option.text)
+					option.flag = toCamelCase(option.flag or option.text)
 					option.subcount = 0
 					option.tip = option.tip and tostring(option.tip)
 					library.flags[option.flag] = option.value
@@ -2396,7 +2396,7 @@ do
 					option.type = 'list'
 					option.position = #self.options
 					option.labels = {}
-					option.flag = (library.flagprefix or '') .. toCamelCase(option.flag or option.text)
+					option.flag = toCamelCase(option.flag or option.text)
 					option.subcount = 0
 					option.tip = option.tip and tostring(option.tip)
 					library.flags[option.flag] = option.value
@@ -2446,7 +2446,7 @@ do
 					option.callback = typeof(option.callback) == 'function' and option.callback or function() end
 					option.type = 'box'
 					option.position = #self.options
-					option.flag = (library.flagprefix or '') .. toCamelCase(option.flag or option.text)
+					option.flag = toCamelCase(option.flag or option.text)
 					option.tip = option.tip and tostring(option.tip)
 					library.flags[option.flag] = option.value
 					table.insert(self.options, option)
@@ -2474,7 +2474,7 @@ do
 					option.subcount = 1
 					option.type = 'color'
 					option.position = #self.options
-					option.flag = (library.flagprefix or '') .. toCamelCase(option.flag or option.text)
+					option.flag = toCamelCase(option.flag or option.text)
 					option.tip = option.tip and tostring(option.tip)
 					library.flags[option.flag] = option.color
 					table.insert(self.options, option)
@@ -3021,12 +3021,13 @@ do
 		local searchBox = library:Create('TextBox', {
 			BackgroundTransparency = 1,
 			Position = UDim2.fromOffset(searchLabel.AbsolutePosition.X-80, 5),
-			Size = UDim2.fromOffset(50, 15),
+			Size = UDim2.fromOffset(330, 15),
 			TextColor3 = Color3.fromRGB(255, 255, 255),
 			TextXAlignment = Enum.TextXAlignment.Left,
 			Parent = self.titleLabel,
 			Text = '',
 			PlaceholderText = 'Type something to search...',
+			TextTruncate = Enum.TextTruncate.AtEnd,
 			Visible = false
 		})
 
