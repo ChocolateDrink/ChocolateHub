@@ -45,9 +45,9 @@ function entity.getData(player, tab)
 	local floatHealth = (health / maxHealth) * 100
 
 	if tab then
-		return {char = character, float = floatHealth, floored = math.floor(health), root = root, pos = root.CFrame.Position}
+		return {char = character, float = floatHealth, floored = math.floor(health), max = maxHealth, root = root, pos = root.CFrame.Position}
 	else
-		return character, floatHealth, root, math.floor(health)
+		return character, floatHealth, root, math.floor(health), maxHealth
 	end
 end
 
