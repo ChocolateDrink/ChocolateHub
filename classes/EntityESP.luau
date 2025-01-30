@@ -254,6 +254,9 @@ do
 		highHpColor = flags.espHighHealthColor
 	end
 
+	updateESP()
+	runService:BindToRenderStep('', Enum.RenderPriority.Camera.Value, updateESP)
+
 	labelOffset = EntityESP:Convert(0, 3.25, 0)
 	boxOffsetTopRight = EntityESP:Convert(2.5, 3, 0)
 	boxOffsetBottomLeft = EntityESP:Convert(-2.5, -4.5, 0)
@@ -262,9 +265,6 @@ do
 	healthBarOffsetBottomLeft = EntityESP:Convert(-3.5, -4.5, 0)
 	healthBarValueOffsetTopRight = EntityESP:Convert(-3.05, 2.95, 0)
 	healthBarValueOffsetBottomLeft = EntityESP:Convert(3.45, 4.45, 0)
-
-	updateESP()
-	runService:BindToRenderStep('', Enum.RenderPriority.Camera.Value, updateESP)
 end
 
 return EntityESP
