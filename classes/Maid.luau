@@ -1,7 +1,7 @@
-local Signal = fetch('classes/Signal')
-
 local Maid = {}
 Maid.__index = Maid
+
+local Signal = fetch('classes/Signal')
 
 function Maid.new()
 	local self = setmetatable({
@@ -48,6 +48,7 @@ function Maid:Clean()
 		elseif value.Destroy then
 			value:Destroy()
 		end
+
 		index, value = next(tasks)
 	end
 end
