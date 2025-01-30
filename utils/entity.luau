@@ -66,10 +66,11 @@ function entity.isSameTeam(player)
 end
 
 function entity.closestToMouse(options)
-	options = typeof(options) == 'table' and options or {}
+	options = options or {}
+	local found = nil
 
-	local found, distance = nil, math.huge
 	local part = options.part or 'HumanoidRootPart'
+	local range = options.range or math.huge
 
 	for _, v in next, players:GetPlayers() do
 		if v == localPlayer then continue end
@@ -88,21 +89,22 @@ function entity.closestToMouse(options)
 		local vector, visible = workspace.CurrentCamera:WorldToViewportPoint(targetPart.CFrame.Position)
 		local magnitude = (input:GetMouseLocation() - Vector2.new(vector.X, vector.Y)).Magnitude
 
-		if magnitude > distance or not visible then continue end
+		if magnitude > range or not visible then continue end
 
 		found = v
-		distance = magnitude
+		range = magnitude
 	end
 
 	return found
 end
 
 function entity.closestToPosition(options)
-	options = typeof(options) == 'table' and options or {}
-	local found, distance = nil, math.huge
+	options = options or {}
+	local found = nil
 
 	local localData = entity.getData(1, true)
 	local part = options.part or 'HumanoidRootPart'
+	local range = options.range or math.huge
 
 	for _, v in next, players:GetPlayers() do
 		if v == localPlayer then continue end
@@ -119,10 +121,10 @@ function entity.closestToPosition(options)
 		if options.customCheck and options.customCheck() then continue end
 
 		local magnitude = (localData.pos - otherData.pos).Magnitude
-		if magnitude > distance then continue end
+		if magnitude > range then continue end
 
 		found = v
-		distance = magnitude
+		range = magnitude
 	end
 
 	return found
