@@ -20,7 +20,7 @@ local maxEspDistance
 local showTeam, useTeamColor, allyColor, enemyColor
 local showName, showDistance, showHealth, useFloatHealth
 local toggleBoxes, toggleHealthBar, toggleTracers, unlockTracers
-local lowHpColor, highHpColor
+local lowHpColor, highHpColor = Color3.new(1, 0, 0), Color3.new(0, 1, 0)
 
 local labelOffset
 local boxOffsetTopRight
