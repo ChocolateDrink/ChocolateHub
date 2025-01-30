@@ -84,9 +84,12 @@ do -- hooks
 end
 
 do -- funcs
-	function funcs.keepSprint(t)
+	function funcs.keepSprint()
 		if inputService:GetFocusedTextBox() then return end
-		virtualInput:SendKeyEvent(t, Enum.KeyCode.LeftShift, false, game)
+
+		virtualInput:SendKeyEvent(true, Enum.KeyCode.LeftShift, false, game)
+		task.wait()
+		virtualInput:SendKeyEvent(false, Enum.KeyCode.LeftShift, false, game)
 	end
 
 	function funcs.speed(t)
