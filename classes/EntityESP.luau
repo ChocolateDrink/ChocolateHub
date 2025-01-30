@@ -43,8 +43,8 @@ do
 		self._label.Center = true
 		self._label.Outline = true
 		self._label.Text = ''
-		self._label.Font = Drawing.Fonts[flags.espFont]
-		self._label.Size = flags.textSize
+		self._label.Font = Drawing.Fonts.Plex
+		self._label.Size = 17
 		self._label.Color = Color3.new(1, 1, 1)
 
 		self._box = Drawing.new('Quad')
@@ -214,14 +214,6 @@ do
 		set(self._healthBar, 'Visible', false)
 		set(self._healthBarValue, 'Visible', false)
 	end
-
-	function EntityESP:SetFont(font)
-		set(self._label, 'Font', font)
-	end
-
-	function EntityESP:SetTextSize(textSize)
-		set(self._label, 'Size', textSize)
-	end
 end
 
 do
@@ -252,19 +244,19 @@ do
 		unlockTracers = flags.espUnloackTraces
 		lowHpColor = flags.espLowHealthColor
 		highHpColor = flags.espHighHealthColor
+
+		labelOffset = EntityESP:Convert(0, 3.25, 0)
+		boxOffsetTopRight = EntityESP:Convert(2.5, 3, 0)
+		boxOffsetBottomLeft = EntityESP:Convert(-2.5, -4.5, 0)
+		tracerOffset = EntityESP:Convert(0, -4.5, 0)
+		healthBarOffsetTopRight = EntityESP:Convert(-3, 3, 0)
+		healthBarOffsetBottomLeft = EntityESP:Convert(-3.5, -4.5, 0)
+		healthBarValueOffsetTopRight = EntityESP:Convert(-3.05, 2.95, 0)
+		healthBarValueOffsetBottomLeft = EntityESP:Convert(3.45, 4.45, 0)
 	end
 
 	updateESP()
 	runService:BindToRenderStep('', Enum.RenderPriority.Camera.Value, updateESP)
-
-	labelOffset = EntityESP:Convert(0, 3.25, 0)
-	boxOffsetTopRight = EntityESP:Convert(2.5, 3, 0)
-	boxOffsetBottomLeft = EntityESP:Convert(-2.5, -4.5, 0)
-	tracerOffset = EntityESP:Convert(0, -4.5, 0)
-	healthBarOffsetTopRight = EntityESP:Convert(-3, 3, 0)
-	healthBarOffsetBottomLeft = EntityESP:Convert(-3.5, -4.5, 0)
-	healthBarValueOffsetTopRight = EntityESP:Convert(-3.05, 2.95, 0)
-	healthBarValueOffsetBottomLeft = EntityESP:Convert(3.45, 4.45, 0)
 end
 
 return EntityESP
