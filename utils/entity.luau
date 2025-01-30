@@ -5,6 +5,18 @@ local input = cloneref(game:GetService('UserInputService'))
 
 local localPlayer = players.localPlayer
 
+function entity.getRoot()
+	local char = localPlayer.Character
+	if not char then
+		return nil
+	end
+
+	local root = char:FindFirstChild('HumanoidRootPart')
+	local hum = char:FindFirstChildOfClass('Humanoid')
+
+	return root, hum
+end
+
 function entity.getData(player, tab)
 	if typeof(player) == 'string' then
 		player = players:FindFirstChild(player)
