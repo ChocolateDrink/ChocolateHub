@@ -10,7 +10,6 @@ local function set(self, p, v) self[p] = v end
 local function get(self, p) return self[p] end
 
 local flags = library.flags
-local lerp = Color3.new().lerp
 
 local vector3New = Vector3.new
 local Vector2New = Vector2.new
@@ -172,7 +171,7 @@ do
 			set(healthBar, 'PointD', Vector2New(healthBarTopRightX, healthBarBottomLeftY))
 
 			set(healthBarValue, 'Visible', visible)
-			set(healthBarValue, 'Color', lerp(lowHpColor, highHpColor, floatHealth / 100))
+			set(healthBarValue, 'Color', lowHpColor:Lerp(highHpColor, floatHealth / 100))
 
 			set(healthBarValue, 'PointA', Vector2New(healthBarValueTopRightX, healthBarValueTopRightY))
 			set(healthBarValue, 'PointB', Vector2New(healthBarValueBottomLeftX, healthBarValueTopRightY))
