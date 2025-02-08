@@ -51,7 +51,8 @@ local library = {
 	theme = {},
 	foldername = isGlobalConfigOn and 'ChocolateHub/configs/global' or string.format('ChocolateHub/configs/%s', localPlayer.UserId),
 	fileext = '.json',
-	chromaColor = Color3.new()
+	chromaColor = Color3.new(),
+	savingEnabled = true
 }
 
 do
@@ -358,6 +359,7 @@ do
 
 	function library:UpdateConfig()
 		if not library.hasInit then return end
+		if not library.savingEnabled then return end
 
 		library:SaveConfig(library.loadedConfig or 'default')
 	end
@@ -787,9 +789,9 @@ do
 		local maid = Maid.new()
 
 		local function formatKey(key)
-			if (key:match('Mouse')) then
+			if key:match('Mouse') then
 				key = key:gsub('Button', ''):gsub('Mouse', 'M')
-			elseif (key:match('Shift') or key:match('Alt') or key:match('Control')) then
+			elseif key:match('Shift') or key:match('Alt') or key:match('Control') then
 				key = key:gsub('Left', 'L'):gsub('Right', 'R')
 			end
 
@@ -797,7 +799,7 @@ do
 		end
 
 		local function formatKeys(keys)
-			if (not keys) then return {} end
+			if not keys then return {} end
 			local ret = {}
 
 			for _, key in next, keys do
@@ -812,7 +814,7 @@ do
 		makeTooltip(interest, option)
 
 		library.unloadMaid:GiveTask(interest.InputEnded:connect(function(input)
-			if (input.UserInputType.Name == 'MouseButton1' and not busy) then
+			if input.UserInputType.Name == 'MouseButton1' and not busy then
 				busy = true
 				library.disableKeyBind = true
 
@@ -827,13 +829,13 @@ do
 					for _, key in next, inputService:GetKeysPressed() do
 						local value = formatKey(key.KeyCode.Name)
 
-						if (value == 'BACKSPACE') then
+						if value == 'BACKSPACE' then
 							maid.keybindLoop = nil
 							option:SetKeys('none')
 							return
 						end
 
-						if (table.find(displayKeys, value)) then continue end
+						if table.find(displayKeys, value) then continue end
 						table.insert(displayKeys, value)
 						table.insert(keys, key.KeyCode)
 					end
@@ -841,10 +843,10 @@ do
 					for _, mouseBtn in next, inputService:GetMouseButtonsPressed() do
 						local value = formatKey(mouseBtn.UserInputType.Name)
 
-						if (option.nomouse) then continue end
-						if (not table.find(whitelistedMouseinputs, mouseBtn.UserInputType)) then continue end
+						if option.nomouse then continue end
+						if not table.find(whitelistedMouseinputs, mouseBtn.UserInputType) then continue end
 
-						if (table.find(displayKeys, value)) then continue end
+						if table.find(displayKeys, value) then continue end
 
 						table.insert(displayKeys, value)
 						table.insert(keys, mouseBtn.UserInputType)
@@ -852,14 +854,14 @@ do
 
 					bindinput.Text = '[' .. table.concat(displayKeys, '+') .. ']'
 
-					if (#displayKeys == 3) then
+					if #displayKeys == 3 then
 						maid.keybindLoop = nil
 					end
 				end)
 
 				task.wait(0.05)
 				maid.onInputEnded = inputService.InputEnded:Connect(function(input)
-					if (input.UserInputType ~= Enum.UserInputType.Keyboard and not input.UserInputType.Name:find('MouseButton')) then return end
+					if input.UserInputType ~= Enum.UserInputType.Keyboard and not input.UserInputType.Name:find('MouseButton') then return end
 
 					maid.keybindLoop = nil
 					maid.onInputEnded = nil
@@ -876,13 +878,13 @@ do
 			local foundCount = 0
 
 			for _, key in next, inputService:GetKeysPressed() do
-				if (table.find(option.keys, key.KeyCode)) then
+				if table.find(option.keys, key.KeyCode) then
 					foundCount += 1
 				end
 			end
 
 			for _, key in next, inputService:GetMouseButtonsPressed() do
-				if (table.find(option.keys, key.UserInputType)) then
+				if table.find(option.keys, key.UserInputType) then
 					foundCount += 1
 				end
 			end
@@ -893,17 +895,17 @@ do
 		local debounce = false
 
 		function option:SetKeys(keys)
-			if (typeof(keys) == 'string') then
+			if typeof(keys) == 'string' then
 				keys = {keys}
 			end
 
 			keys = keys or {option.key ~= 'none' and option.key or nil}
 
 			for i, key in next, keys do
-				if (typeof(key) == 'string' and key ~= 'none') then
+				if typeof(key) == 'string' and key ~= 'none' then
 					local isMouse = key:find('MouseButton')
 
-					if (isMouse) then
+					if isMouse then
 						keys[i] = Enum.UserInputType[key]
 					else
 						keys[i] = Enum.KeyCode[key]
@@ -913,7 +915,7 @@ do
 
 			bindinput.TextColor3 = Color3.fromRGB(160, 160, 160)
 
-			if (Loop) then
+			if Loop then
 				Loop:Disconnect()
 				Loop = nil
 				library.flags[option.flag] = false
@@ -922,7 +924,7 @@ do
 
 			self.keys = keys
 
-			if (self.keys[1] == 'Backspace' or #self.keys == 0) then
+			if self.keys[1] == 'Backspace' or #self.keys == 0 then
 				self.key = 'none'
 				bindinput.Text = '[NONE]'
 			else
@@ -933,13 +935,13 @@ do
 
 			bindinput.Size = UDim2.new(0, -textService:GetTextSize(bindinput.Text, 16, Enum.Font.Code, Vector2.new(9e9, 9e9)).X, 0, 16)
 
-			if (self.key == 'none') then
+			if self.key == 'none' then
 				maid.onKeyPress = nil
 				maid.onKeyRelease = nil
 			else
 				maid.onKeyPress = library.OnKeyPress:Connect(function()
-					if (library.disableKeyBind or #option.keys == 0 or debounce) then return end
-					if (not isKeybindPressed()) then return end
+					if library.disableKeyBind or #option.keys == 0 or debounce then return end
+					if not isKeybindPressed() then return end
 
 					debounce = true
 
@@ -949,14 +951,14 @@ do
 					else
 						library.flags[option.flag] = true
 
-						if (Loop) then
+						if Loop then
 							Loop:Disconnect()
 							Loop = nil
 							option.callback(true, 0)
 						end
 
 						Loop = library:AddConnection(runService.Heartbeat, function(step)
-							if (not inputService:GetFocusedTextBox()) then
+							if not inputService:GetFocusedTextBox() then
 								option.callback(nil, step)
 							end
 						end)
@@ -964,14 +966,14 @@ do
 				end)
 
 				maid.onKeyRelease = library.OnKeyRelease:Connect(function()
-					if (debounce and not isKeybindPressed()) then debounce = false end
-					if (option.mode ~= 'hold') then return end
+					if debounce and not isKeybindPressed() then debounce = false end
+					if option.mode ~= 'hold' then return end
 
 					local bindKey = option.key
-					if (bindKey == 'none') then return end
+					if bindKey == 'none' then return end
 
-					if (not isKeybindPressed()) then
-						if (Loop) then
+					if not isKeybindPressed() then
+						if Loop then
 							Loop:Disconnect()
 							Loop = nil
 
@@ -989,7 +991,7 @@ do
 	local function createSlider(option, parent)
 		option.hasInit = true
 
-		if (option.sub) then
+		if option.sub then
 			option.main = option:getMain()
 		else
 			option.main = library:Create('Frame', {
@@ -1066,7 +1068,7 @@ do
 			Parent = option.fill
 		})
 
-		if (option.min >= 0) then
+		if option.min >= 0 then
 			option.fill.Size = UDim2.new((option.value - option.min) / (option.max - option.min), 0, 1, 0)
 		else
 			option.fill.Position = UDim2.new((0 - option.min) / (option.max - option.min), 0, 0, 0)
@@ -1075,7 +1077,7 @@ do
 
 		local manualInput
 		library.unloadMaid:GiveTask(option.title.Focused:connect(function()
-			if (not manualInput) then
+			if not manualInput then
 				option.title:ReleaseFocus()
 				option.title.Text = (option.text == 'nil' and '' or option.text .. ': ') .. option.value .. option.suffix
 			end
@@ -1083,8 +1085,8 @@ do
 
 		library.unloadMaid:GiveTask(option.title.FocusLost:connect(function()
 			option.slider.BorderColor3 = Color3.new()
-			if (manualInput) then
-				if (tonumber(option.title.Text)) then
+			if manualInput then
+				if tonumber(option.title.Text) then
 					option:SetValue(tonumber(option.title.Text))
 				else
 					option.title.Text = (option.text == 'nil' and '' or option.text .. ': ') .. option.value .. option.suffix
@@ -1095,8 +1097,8 @@ do
 
 		local interest = (option.sub or option.textpos) and option.slider or option.main
 		library.unloadMaid:GiveTask(interest.InputBegan:connect(function(input)
-			if (input.UserInputType.Name == 'MouseButton1') then
-				if (inputService:IsKeyDown(Enum.KeyCode.LeftControl) or inputService:IsKeyDown(Enum.KeyCode.RightControl)) then
+			if input.UserInputType.Name == 'MouseButton1' then
+				if inputService:IsKeyDown(Enum.KeyCode.LeftControl) or inputService:IsKeyDown(Enum.KeyCode.RightControl) then
 					manualInput = true
 					option.title:CaptureFocus()
 				else
@@ -1105,11 +1107,11 @@ do
 					option:SetValue(option.min + ((input.Position.X - option.slider.AbsolutePosition.X) / option.slider.AbsoluteSize.X) * (option.max - option.min))
 				end
 			end
-			if (input.UserInputType.Name == 'MouseMovement') then
-				if (not library.warning and not library.slider) then
+			if input.UserInputType.Name == 'MouseMovement' then
+				if not library.warning and not library.slider then
 					option.slider.BorderColor3 = library.flags.menuAccentColor
 				end
-				if (option.tip) then
+				if option.tip then
 					library.tooltip.Text = option.tip
 				end
 			end
@@ -1118,14 +1120,14 @@ do
 		makeTooltip(interest, option)
 
 		library.unloadMaid:GiveTask(interest.InputEnded:connect(function(input)
-			if (input.UserInputType.Name == 'MouseMovement') then
-				if (option ~= library.slider) then
+			if input.UserInputType.Name == 'MouseMovement' then
+				if option ~= library.slider then
 					option.slider.BorderColor3 = Color3.new()
 				end
 			end
 		end))
 
-		if (option.parent) then
+		if option.parent then
 			local oldParent = option.slider.Parent
 
 			option.parent.onStateChanged:Connect(function(state)
@@ -1141,7 +1143,7 @@ do
 			value = library.round(value, option.float)
 			value = math.clamp(value, self.min, self.max)
 
-			if (self.min >= 0) then
+			if self.min >= 0 then
 				tweenService:Create(option.fill, tweenInfo, {Size = UDim2.new((value - self.min) / (self.max - self.min), 0, 1, 0)}):Play()
 			else
 				tweenService:Create(option.fill, tweenInfo, {
@@ -1152,7 +1154,7 @@ do
 			library.flags[self.flag] = value
 			self.value = value
 			option.title.Text = (option.text == 'nil' and '' or option.text .. ': ') .. string.format(option.float == 1 and '%d' or '%.02f', option.value) .. option.suffix
-			if (not nocallback) then
+			if not nocallback then
 				task.spawn(self.callback, value)
 			end
 
@@ -1160,7 +1162,7 @@ do
 		end
 
 		task.defer(function()
-			if (library) then
+			if library then
 				option:SetValue(option.value)
 			end
 		end)
@@ -1169,7 +1171,7 @@ do
 	local function createList(option, parent)
 		option.hasInit = true
 
-		if (option.sub) then
+		if option.sub then
 			option.main = option:getMain()
 			option.main.Size = UDim2.new(1, 0, 0, 48)
 		else
@@ -1180,7 +1182,7 @@ do
 				Parent = parent
 			})
 
-			if (option.text ~= 'nil') then
+			if option.text ~= 'nil' then
 				library:Create('TextLabel', {
 					Position = UDim2.new(0, 6, 0, 0),
 					Size = UDim2.new(1, -12, 0, 18),
@@ -1195,12 +1197,12 @@ do
 			end
 		end
 
-		if (option.playerOnly) then
+		if option.playerOnly then
 			library.OnLoad:Connect(function()
 				option.values = {}
 
 				for _, v in next, players:GetPlayers() do
-					if (v == localPlayer) then continue end
+					if v == localPlayer then continue end
 					option:AddValue(v.Name)
 				end
 
@@ -1218,15 +1220,15 @@ do
 			local t = {}
 
 			pcall(function()
-				if (option.playerOnly and option.multiselect) then
+				if option.playerOnly and option.multiselect then
 					for i in next, option.values do
-						if (option.value[i]) then
+						if option.value[i] then
 							table.insert(t, tostring(i))
 						end
 					end
 				else
 					for _, v in next, option.values do
-						if (option.value[v]) then
+						if option.value[v] then
 							table.insert(t, tostring(v))
 						end
 					end
@@ -1368,10 +1370,10 @@ do
 		library.unloadMaid:GiveTask(option.listvalue.FocusLost:Connect(function() focused = false end))
 
 		library.unloadMaid:GiveTask(option.listvalue:GetPropertyChangedSignal('Text'):Connect(function()
-			if (not focused) then return end
+			if not focused then return end
 			local newText = option.listvalue.Text
 
-			if (newText:sub(1, 1) ~= ' ') then
+			if newText:sub(1, 1) ~= ' ' then
 				newText = ' ' .. newText
 				option.listvalue.Text = newText
 				option.listvalue.CursorPosition = 2
@@ -1381,7 +1383,7 @@ do
 			local matchedResults = 0
 
 			for name, label in next, option.labels do
-				if (string.find(string.lower(name), search)) then
+				if string.find(string.lower(name), search) then
 					matchedResults += 1
 					label.Visible = true
 				else
@@ -1393,9 +1395,9 @@ do
 		end))
 
 		library.unloadMaid:GiveTask(option.listvalue.InputBegan:connect(function(input)
-			if (input.UserInputType.Name == 'MouseButton1') then
-				if (library.popup == option) then library.popup:Close() return end
-				if (library.popup) then library.popup:Close() end
+			if input.UserInputType.Name == 'MouseButton1' then
+				if library.popup == option then library.popup:Close() return end
+				if library.popup then library.popup:Close() end
 
 				option.arrow.Rotation = -90
 				option.open = true
@@ -1407,29 +1409,29 @@ do
 				option.listvalue:CaptureFocus()
 				option.listvalue.CursorPosition = string.len(typeof(option.value) == 'string' and option.value or getMultiText() or option.value) + 2
 
-				if (option.multiselect) then
+				if option.multiselect then
 					option.listvalue.Text = ' '
 				end
 			end
 
-			if (input.UserInputType.Name == 'MouseMovement') then
-				if (not library.warning and not library.slider) then
+			if input.UserInputType.Name == 'MouseMovement' then
+				if not library.warning and not library.slider then
 					option.listvalue.BorderColor3 = library.flags.menuAccentColor
 				end
 			end
 		end))
 
 		library.unloadMaid:GiveTask(option.listvalue.InputEnded:connect(function(input)
-			if (input.UserInputType.Name == 'MouseMovement') then
-				if (not option.open) then
+			if input.UserInputType.Name == 'MouseMovement' then
+				if not option.open then
 					option.listvalue.BorderColor3 = Color3.new()
 				end
 			end
 		end))
 
 		library.unloadMaid:GiveTask(interest.InputBegan:connect(function(input)
-			if (input.UserInputType.Name == 'MouseMovement') then
-				if (option.tip) then
+			if input.UserInputType.Name == 'MouseMovement' then
+				if option.tip then
 					library.tooltip.Text = option.tip
 				end
 			end
@@ -1438,15 +1440,15 @@ do
 		makeTooltip(interest, option)
 
 		function option:AddValue(value, state)
-			if (self.labels[value]) then return end
+			if self.labels[value] then return end
 			state = state or (option.playerOnly and false)
 
 			valueCount += 1
 
-			if (self.multiselect) then
+			if self.multiselect then
 				self.values[value] = state
 			else
-				if (not table.find(self.values, value)) then
+				if not table.find(self.values, value) then
 					table.insert(self.values, value)
 				end
 			end
@@ -1482,8 +1484,8 @@ do
 			table.insert(library.theme, labelOverlay)
 
 			library.unloadMaid:GiveTask(label.InputBegan:connect(function(input)
-				if (input.UserInputType.Name == 'MouseButton1') then
-					if (self.multiselect) then
+				if input.UserInputType.Name == 'MouseButton1' then
+					if self.multiselect then
 						self.value[value] = not self.value[value]
 						self:SetValue(self.value)
 						self.listvalue.Text = ' '
@@ -1503,19 +1505,19 @@ do
 
 		function option:RemoveValue(value)
 			local label = self.labels[value]
-			if (label) then
+			if label then
 				label:Destroy()
 				self.labels[value] = nil
 				valueCount = valueCount - 1
-				if (self.multiselect) then
+				if self.multiselect then
 					self.values[value] = nil
 					self:SetValue(self.value)
 				else
 					table.remove(self.values, table.find(self.values, value))
-					if (self.value == value) then
+					if self.value == value then
 						self:SetValue(self.values[1] or '')
 
-						if (not self.values[1]) then
+						if not self.values[1] then
 							option.listvalue.Text = ''
 						end
 					end
@@ -1524,21 +1526,21 @@ do
 		end
 
 		function option:SetValue(value, nocallback)
-			if (self.multiselect and typeof(value) ~= 'table') then
+			if self.multiselect and typeof(value) ~= 'table' then
 				value = {}
 				for i,v in next, self.values do
 					value[v] = false
 				end
 			end
 
-			if (not value) then return end
+			if not value then return end
 
 			self.value = self.multiselect and value or self.values[table.find(self.values, value) or 1]
-			if (self.playerOnly and not self.multiselect) then
+			if self.playerOnly and not self.multiselect then
 				self.value = players:FindFirstChild(value)
 			end
 
-			if (not self.value) then return end
+			if not self.value then return end
 
 			library.flags[self.flag] = self.value
 			option.listvalue.Text = ' ' .. (self.multiselect and getMultiText() or tostring(self.value))
@@ -1546,18 +1548,18 @@ do
 			for name, label in next, self.labels do
 				local visible = self.multiselect and self.value[name] or self.value == name
 				label.TextTransparency = visible and 1 or 0
-				if (label:FindFirstChild'TextLabel') then
+				if label:FindFirstChild'TextLabel' then
 					label.TextLabel.Visible = visible
 				end
 			end
 
-			if (not nocallback) then
+			if not nocallback then
 				self.callback(self.value)
 			end
 		end
 
 		task.defer(function()
-			if (library and not option.noload) then
+			if library and not option.noload then
 				option:SetValue(option.value)
 			end
 		end)
@@ -1589,7 +1591,7 @@ do
 			Parent = parent
 		})
 
-		if (option.text ~= 'nil') then
+		if option.text ~= 'nil' then
 			option.title = library:Create('TextLabel', {
 				Position = UDim2.new(0, 6, 0, 0),
 				Size = UDim2.new(1, -12, 0, 18),
@@ -1665,11 +1667,11 @@ do
 		end))
 
 		library.unloadMaid:GiveTask(inputvalue.InputBegan:connect(function(input)
-			if (input.UserInputType.Name == 'MouseMovement') then
-				if (not library.warning and not library.slider) then
+			if input.UserInputType.Name == 'MouseMovement' then
+				if not library.warning and not library.slider then
 					option.holder.BorderColor3 = library.flags.menuAccentColor
 				end
-				if (option.tip) then
+				if option.tip then
 					library.tooltip.Text = option.tip
 				end
 			end
@@ -1678,15 +1680,15 @@ do
 		makeTooltip(inputvalue, option)
 
 		library.unloadMaid:GiveTask(inputvalue.InputEnded:connect(function(input)
-			if (input.UserInputType.Name == 'MouseMovement') then
-				if (not inputvalue:IsFocused()) then
+			if input.UserInputType.Name == 'MouseMovement' then
+				if not inputvalue:IsFocused() then
 					option.holder.BorderColor3 = Color3.new()
 				end
 			end
 		end))
 
 		function option:SetValue(value, enter)
-			if (value:gsub('%s+', '') == '') then
+			if value:gsub('%s+', '') == '' then
 				value = ''
 			end
 
@@ -1698,7 +1700,7 @@ do
 			library.OnFlagChanged:Fire(self)
 		end
 		task.defer(function()
-			if (library) then
+			if library then
 				option:SetValue(option.value)
 			end
 		end)
@@ -1810,7 +1812,7 @@ do
 		local editingtrans
 
 		local transMain
-		if (option.trans) then
+		if option.trans then
 			transMain = library:Create('ImageLabel', {
 				ZIndex = 5,
 				Size = UDim2.new(1, 0, 1, 0),
@@ -1841,14 +1843,14 @@ do
 			})
 
 			library.unloadMaid:GiveTask(transMain.InputBegan:connect(function(Input)
-				if (Input.UserInputType.Name == 'MouseButton1') then
+				if Input.UserInputType.Name == 'MouseButton1' then
 					editingtrans = true
 					option:SetTrans(1 - ((Input.Position.Y - transMain.AbsolutePosition.Y) / transMain.AbsoluteSize.Y))
 				end
 			end))
 
 			library.unloadMaid:GiveTask(transMain.InputEnded:connect(function(Input)
-				if (Input.UserInputType.Name == 'MouseButton1') then
+				if Input.UserInputType.Name == 'MouseButton1' then
 					editingtrans = false
 				end
 			end))
@@ -1887,7 +1889,7 @@ do
 		})
 
 		library.unloadMaid:GiveTask(hueMain.InputBegan:connect(function(Input)
-			if (Input.UserInputType.Name == 'MouseButton1') then
+			if Input.UserInputType.Name == 'MouseButton1' then
 				editinghue = true
 				local X = (hueMain.AbsolutePosition.X + hueMain.AbsoluteSize.X) - hueMain.AbsolutePosition.X
 				X = math.clamp((Input.Position.X - hueMain.AbsolutePosition.X) / X, 0, 0.995)
@@ -1896,7 +1898,7 @@ do
 		end))
 
 		library.unloadMaid:GiveTask(hueMain.InputEnded:connect(function(Input)
-			if (Input.UserInputType.Name == 'MouseButton1') then
+			if Input.UserInputType.Name == 'MouseButton1' then
 				editinghue = false
 			end
 		end))
@@ -1923,7 +1925,7 @@ do
 		})
 
 		library.unloadMaid:GiveTask(satval.InputBegan:connect(function(Input)
-			if (Input.UserInputType.Name == 'MouseButton1') then
+			if Input.UserInputType.Name == 'MouseButton1' then
 				editingsatval = true
 				local X = (satval.AbsolutePosition.X + satval.AbsoluteSize.X) - satval.AbsolutePosition.X
 				local Y = (satval.AbsolutePosition.Y + satval.AbsoluteSize.Y) - satval.AbsolutePosition.Y
@@ -1934,27 +1936,27 @@ do
 		end))
 
 		library:AddConnection(inputService.InputChanged, function(Input)
-			if (not editingsatval and not editinghue and not editingtrans) then return end
+			if not editingsatval and not editinghue and not editingtrans then return end
 
-			if (Input.UserInputType.Name == 'MouseMovement') then
-				if (editingsatval) then
+			if Input.UserInputType.Name == 'MouseMovement' then
+				if editingsatval then
 					local X = (satval.AbsolutePosition.X + satval.AbsoluteSize.X) - satval.AbsolutePosition.X
 					local Y = (satval.AbsolutePosition.Y + satval.AbsoluteSize.Y) - satval.AbsolutePosition.Y
 					X = math.clamp((Input.Position.X - satval.AbsolutePosition.X) / X, 0.005, 1)
 					Y = math.clamp((Input.Position.Y - satval.AbsolutePosition.Y) / Y, 0, 0.995)
 					option:SetColor(Color3.fromHSV(hue, X, 1 - Y))
-				elseif (editinghue) then
+				elseif editinghue then
 					local X = (hueMain.AbsolutePosition.X + hueMain.AbsoluteSize.X) - hueMain.AbsolutePosition.X
 					X = math.clamp((Input.Position.X - hueMain.AbsolutePosition.X) / X, 0, 0.995)
 					option:SetColor(Color3.fromHSV(1 - X, sat, val))
-				elseif (editingtrans) then
+				elseif editingtrans then
 					option:SetTrans(1 - ((Input.Position.Y - transMain.AbsolutePosition.Y) / transMain.AbsoluteSize.Y))
 				end
 			end
 		end)
 
 		library.unloadMaid:GiveTask(satval.InputEnded:connect(function(Input)
-			if (Input.UserInputType.Name == 'MouseButton1') then
+			if Input.UserInputType.Name == 'MouseButton1' then
 				editingsatval = false
 			end
 		end))
@@ -1977,7 +1979,7 @@ do
 
 			hue = hue == 0 and 1 or hue
 			satval.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
-			if (option.trans) then
+			if option.trans then
 				transMain.ImageColor3 = Color3.fromHSV(hue, 1, 1)
 			end
 			hueSlider.Position = UDim2.new(1 - hue, 0, 0, 0)
@@ -1996,7 +1998,7 @@ do
 	local function createColor(option, parent)
 		option.hasInit = true
 
-		if (option.sub) then
+		if option.sub then
 			option.main = option:getMain()
 		else
 			option.main = library:Create('Frame', {
@@ -2060,18 +2062,18 @@ do
 
 		local interest = option.sub and option.visualize or option.main
 
-		if (option.sub) then
+		if option.sub then
 			option.visualize.Text = ''
 			option.visualize.AutoButtonColor = false
 		end
 
 		library.unloadMaid:GiveTask(interest.InputBegan:connect(function(input)
-			if (input.UserInputType.Name == 'MouseButton1') then
-				if (not option.mainHolder) then
+			if input.UserInputType.Name == 'MouseButton1' then
+				if not option.mainHolder then
 					createColorPickerWindow(option)
 				end
-				if (library.popup == option) then library.popup:Close() return end
-				if (library.popup) then library.popup:Close() end
+				if library.popup == option then library.popup:Close() return end
+				if library.popup then library.popup:Close() end
 				option.open = true
 				local pos = option.main.AbsolutePosition
 				option.mainHolder.Position = UDim2.new(0, pos.X + 36 + (option.trans and -16 or 0), 0, pos.Y + 56)
@@ -2079,11 +2081,11 @@ do
 				library.popup = option
 				option.visualize.BorderColor3 = library.flags.menuAccentColor
 			end
-			if (input.UserInputType.Name == 'MouseMovement') then
-				if (not library.warning and not library.slider) then
+			if input.UserInputType.Name == 'MouseMovement' then
+				if not library.warning and not library.slider then
 					option.visualize.BorderColor3 = library.flags.menuAccentColor
 				end
-				if (option.tip) then
+				if option.tip then
 					library.tooltip.Text = option.tip
 				end
 			end
@@ -2092,8 +2094,8 @@ do
 		makeTooltip(interest, option)
 
 		library.unloadMaid:GiveTask(interest.InputEnded:connect(function(input)
-			if (input.UserInputType.Name == 'MouseMovement') then
-				if (not option.open) then
+			if input.UserInputType.Name == 'MouseMovement' then
+				if not option.open then
 					option.visualize.BorderColor3 = Color3.new()
 				end
 			end
@@ -2101,26 +2103,26 @@ do
 
 		function option:SetColor(newColor, nocallback, noFire)
 			newColor = newColor or Color3.new(1, 1, 1)
-			if (self.mainHolder) then
+			if self.mainHolder then
 				self:updateVisuals(newColor)
 			end
 			option.visualize.BackgroundColor3 = newColor
 			library.flags[self.flag] = newColor
 			self.color = newColor
 
-			if (not nocallback) then
+			if not nocallback then
 				task.spawn(self.callback, newColor)
 			end
 
-			if (not noFire) then
+			if not noFire then
 				library.OnFlagChanged:Fire(self)
 			end
 		end
 
-		if (option.trans) then
+		if option.trans then
 			function option:SetTrans(value, manual)
 				value = math.clamp(tonumber(value) or 0, 0, 1)
-				if (self.transSlider) then
+				if self.transSlider then
 					self.transSlider.Position = UDim2.new(0, 0, value, 0)
 				end
 				self.trans = value
@@ -2131,7 +2133,7 @@ do
 		end
 
 		task.defer(function()
-			if (library) then
+			if library then
 				option:SetColor(option.color)
 			end
 		end)
@@ -2163,7 +2165,7 @@ do
 					option.position = #self.options
 					table.insert(self.options, option)
 
-					if (library.hasInit and self.hasInit) then
+					if library.hasInit and self.hasInit then
 						createLabel(option, self.content)
 					else
 						option.Init = createLabel
@@ -2179,7 +2181,7 @@ do
 					option.position = #self.options
 					table.insert(self.options, option)
 
-					if (library.hasInit and self.hasInit) then
+					if library.hasInit and self.hasInit then
 						createDivider(option, self.content)
 					else
 						option.Init = createDivider
@@ -2241,7 +2243,7 @@ do
 						return section:AddSlider(subOption)
 					end
 
-					if (library.hasInit and self.hasInit) then
+					if library.hasInit and self.hasInit then
 						createToggle(option, self.content)
 					else
 						option.Init = createToggle
@@ -2297,7 +2299,7 @@ do
 						option.title.Text = text
 					end
 
-					if (library.hasInit and self.hasInit) then
+					if library.hasInit and self.hasInit then
 						createButton(option, self.content)
 					else
 						option.Init = createButton
@@ -2321,7 +2323,7 @@ do
 					table.insert(self.options, option)
 					library.options[option.flag] = option
 
-					if (library.hasInit and self.hasInit) then
+					if library.hasInit and self.hasInit then
 						createBind(option, self.content)
 					else
 						option.Init = createBind
@@ -2369,7 +2371,7 @@ do
 						return section:AddBind(subOption)
 					end
 
-					if (library.hasInit and self.hasInit) then
+					if library.hasInit and self.hasInit then
 						createSlider(option, self.content)
 					else
 						option.Init = createSlider
@@ -2386,7 +2388,7 @@ do
 					option.callback = typeof(option.callback) == 'function' and option.callback or function() end
 					option.multiselect = typeof(option.multiselect) == 'boolean' and option.multiselect or false
 					option.value = option.multiselect and (typeof(option.value) == 'table' and option.value or {}) or tostring(option.value or option.values[1] or '')
-					if (option.multiselect) then
+					if option.multiselect then
 						for _, v in next, option.values do
 							option.value[v] = false
 						end
@@ -2404,7 +2406,7 @@ do
 					library.options[option.flag] = option
 
 					function option:AddValue(value, state)
-						if (self.multiselect) then
+						if self.multiselect then
 							self.values[value] = state
 						else
 							table.insert(self.values, value)
@@ -2429,7 +2431,7 @@ do
 						return section:AddBind(subOption)
 					end
 
-					if (library.hasInit and self.hasInit) then
+					if library.hasInit and self.hasInit then
 						createList(option, self.content)
 					else
 						option.Init = createList
@@ -2452,7 +2454,7 @@ do
 					table.insert(self.options, option)
 					library.options[option.flag] = option
 
-					if (library.hasInit and self.hasInit) then
+					if library.hasInit and self.hasInit then
 						createBox(option, self.content)
 					else
 						option.Init = createBox
@@ -2489,11 +2491,11 @@ do
 						return section:AddColor(subOption)
 					end
 
-					if (option.trans) then
+					if option.trans then
 						library.flags[option.flag .. 'Transparency'] = option.trans
 					end
 
-					if (library.hasInit and self.hasInit) then
+					if library.hasInit and self.hasInit then
 						createColor(option, self.content)
 					else
 						option.Init = createColor
@@ -2504,13 +2506,13 @@ do
 
 				function section:SetTitle(newTitle)
 					self.title = tostring(newTitle)
-					if (self.titleText) then
+					if self.titleText then
 						self.titleText.Text = tostring(newTitle)
 					end
 				end
 
 				function section:Init()
-					if (self.hasInit) then return end
+					if self.hasInit then return end
 					self.hasInit = true
 
 					self.main = library:Create('Frame', {
@@ -2580,7 +2582,7 @@ do
 					end
 				end
 
-				if (library.hasInit and self.hasInit) then
+				if library.hasInit and self.hasInit then
 					section:Init()
 				end
 
@@ -2588,7 +2590,7 @@ do
 			end
 
 			function column:Init()
-				if (self.hasInit) then return end
+				if self.hasInit then return end
 				self.hasInit = true
 
 				self.main = library:Create('ScrollingFrame', {
@@ -2623,13 +2625,13 @@ do
 				end))
 
 				for _, section in next, self.sections do
-					if (section.canInit and #section.options > 0) then
+					if section.canInit and #section.options > 0 then
 						section:Init()
 					end
 				end
 			end
 
-			if (library.hasInit and self.hasInit) then
+			if library.hasInit and self.hasInit then
 				column:Init()
 			end
 
@@ -2637,7 +2639,7 @@ do
 		end
 
 		function tab:Init()
-			if (self.hasInit) then return end
+			if self.hasInit then return end
 			self.hasInit = true
 
 			local size = textService:GetTextSize(self.title, 18, Enum.Font.Code, Vector2.new(9e9, 9e9)).X + 10
@@ -2658,19 +2660,19 @@ do
 			library.tabSize = library.tabSize + size
 
 			library.unloadMaid:GiveTask(self.button.InputBegan:connect(function(input)
-				if (input.UserInputType.Name == 'MouseButton1') then
+				if input.UserInputType.Name == 'MouseButton1' then
 					library:selectTab(self)
 				end
 			end))
 
 			for _, column in next, self.columns do
-				if (column.canInit) then
+				if column.canInit then
 					column:Init()
 				end
 			end
 		end
 
-		if (self.hasInit) then
+		if self.hasInit then
 			tab:Init()
 		end
 
@@ -2685,12 +2687,12 @@ do
 		local answer
 		function warning:Show()
 			library.warning = warning
-			if (warning.main and warning.type == '') then
+			if warning.main and warning.type == '' then
 				warning.main:Destroy()
 				warning.main = nil
 			end
-			if (library.popup) then library.popup:Close() end
-			if (not warning.main) then
+			if library.popup then library.popup:Close() end
+			if not warning.main then
 				warning.main = library:Create('TextButton', {
 					ZIndex = 2,
 					Size = UDim2.new(1, 0, 1, 0),
@@ -2715,7 +2717,7 @@ do
 					Parent = warning.main
 				})
 
-				if (warning.type == 'confirm') then
+				if warning.type == 'confirm' then
 					local button = library:Create('TextLabel', {
 						ZIndex = 2,
 						Position = UDim2.new(0.5, -105, 0.5, -10),
@@ -2785,13 +2787,13 @@ do
 					})
 
 					library.unloadMaid:GiveTask(button.InputBegan:connect(function(input)
-						if (input.UserInputType.Name == 'MouseButton1') then
+						if input.UserInputType.Name == 'MouseButton1' then
 							answer = true
 						end
 					end))
 
 					library.unloadMaid:GiveTask(button1.InputBegan:connect(function(input)
-						if (input.UserInputType.Name == 'MouseButton1') then
+						if input.UserInputType.Name == 'MouseButton1' then
 							answer = false
 						end
 					end))
@@ -2810,7 +2812,7 @@ do
 					})
 
 					library.unloadMaid:GiveTask(button.InputEnded:connect(function(input)
-						if (input.UserInputType.Name == 'MouseButton1') then
+						if input.UserInputType.Name == 'MouseButton1' then
 							answer = true
 						end
 					end))
@@ -2841,8 +2843,8 @@ do
 	function library:Close()
 		self.open = not self.open
 
-		if (self.main) then
-			if (self.popup) then
+		if self.main then
+			if self.popup then
 				self.popup:Close()
 			end
 
@@ -2853,7 +2855,7 @@ do
 	end
 
 	function library:Init(silent)
-		if (self.hasInit) then return end
+		if self.hasInit then return end
 
 		self.hasInit = true
 		self.base = library:Create('ScreenGui', {IgnoreGuiInset = true, AutoLocalize = false, Enabled = not silent})
@@ -2984,23 +2986,23 @@ do
 		})
 
 		library.unloadMaid:GiveTask(top.InputBegan:connect(function(input)
-			if (input.UserInputType.Name == 'MouseButton1') then
+			if input.UserInputType.Name == 'MouseButton1' then
 				dragObject = self.main
 				dragging = true
 				dragStart = input.Position
 				startPos = dragObject.Position
-				if (library.popup) then library.popup:Close() end
+				if library.popup then library.popup:Close() end
 			end
 		end))
 
 		library.unloadMaid:GiveTask(top.InputChanged:connect(function(input)
-			if (dragging and input.UserInputType.Name == 'MouseMovement') then
+			if dragging and input.UserInputType.Name == 'MouseMovement' then
 				dragInput = input
 			end
 		end))
 
 		library.unloadMaid:GiveTask(top.InputEnded:connect(function(input)
-			if (input.UserInputType.Name == 'MouseButton1') then
+			if input.UserInputType.Name == 'MouseButton1' then
 				dragging = false
 			end
 		end))
@@ -3074,7 +3076,7 @@ do
 			local text = string.lower(searchBox.Text):gsub('%s', '')
 
 			for _, v in next, library.options do
-				if (not v.originalParent) then
+				if not v.originalParent then
 					v.originalParent = v.main.Parent
 				end
 			end
@@ -3085,14 +3087,14 @@ do
 				v.main.Visible = text == '' and true or false
 			end
 
-			if (text == '') then return end
+			if text == '' then return end
 			local matchedResults = false
 
 			for _, v in next, library.options do
 				local main = v.main
 
-				if (v.text == 'Enable' or v.parentFlag) then
-					if (v.type == 'toggle' or v.type == 'bind') then
+				if v.text == 'Enable' or v.parentFlag then
+					if v.type == 'toggle' or v.type == 'bind' then
 						local parentName = v.parentFlag and 'Bind' or v.section.title
 						v.title.Text = string.format('%s [%s]', v.text, parentName)
 
@@ -3100,7 +3102,7 @@ do
 					end
 				end
 
-				if (sFind(sLower(v.text), text) or sFind(sLower(v.flag), text)) then
+				if sFind(sLower(v.text), text) or sFind(sLower(v.flag), text) then
 					matchedResults = true
 					main.Parent = searchContainer
 					table.insert(allFoundResults, v)
@@ -3113,13 +3115,13 @@ do
 		end))
 
 		library.unloadMaid:GiveTask(searchLabel.InputBegan:Connect(function(inputObject)
-			if (inputObject.UserInputType ~= Enum.UserInputType.MouseButton1) then return end
+			if inputObject.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
 			searchBox.Visible = true
 			searchBox:CaptureFocus()
 		end))
 
 		library.unloadMaid:GiveTask(searchBox.FocusLost:Connect(function()
-			if (searchBox.Text:gsub('%s', '') ~= '') then return end
+			if searchBox.Text:gsub('%s', '') ~= '' then return end
 			searchBox.Visible = false
 		end))
 
@@ -3127,13 +3129,13 @@ do
 		local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
 		function self:selectTab(tab)
-			if (self.currentTab == tab) then return end
+			if self.currentTab == tab then return end
 			if library.popup then library.popup:Close() end
 			clearFoundResult()
 			searchBox.Visible = false
 			searchBox.Text = ''
 
-			if (self.currentTab) then
+			if self.currentTab then
 				self.currentTab.button.TextColor3 = Color3.fromRGB(255, 255, 255)
 				for _, column in next, self.currentTab.columns do
 					column.main.Parent = nil
@@ -3158,12 +3160,12 @@ do
 			while (library) do
 				local Configs = self:GetConfigs()
 				for _, config in next, Configs do
-					if (config ~= 'nil' and not table.find(self.options.configList.values, config)) then
+					if config ~= 'nil' and not table.find(self.options.configList.values, config) then
 						self.options.configList:AddValue(config)
 					end
 				end
 				for _, config in next, self.options.configList.values do
-					if (config ~= 'nil' and not table.find(Configs, config)) then
+					if config ~= 'nil' and not table.find(Configs, config) then
 						self.options.configList:RemoveValue(config)
 					end
 				end
@@ -3173,28 +3175,28 @@ do
 		end)
 
 		for _, tab in next, self.tabs do
-			if (tab.canInit) then
+			if tab.canInit then
 				tab:Init()
 			end
 		end
 
 		self:AddConnection(inputService.InputEnded, function(input)
-			if (input.UserInputType.Name == 'MouseButton1') and self.slider then
+			if input.UserInputType.Name == 'MouseButton1' and self.slider then
 				self.slider.slider.BorderColor3 = Color3.new()
 				self.slider = nil
 			end
 		end)
 
 		self:AddConnection(inputService.InputChanged, function(input)
-			if (self.open) then
-				if (input == dragInput and dragging and library.draggable) then
+			if self.open then
+				if input == dragInput and dragging and library.draggable then
 					local delta = input.Position - dragStart
 					local yPos = (startPos.Y.Offset + delta.Y) < -36 and -36 or startPos.Y.Offset + delta.Y
 
 					dragObject:TweenPosition(UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, yPos), 'Out', 'Quint', 0.1, true)
 				end
 
-				if (self.slider and input.UserInputType.Name == 'MouseMovement') then
+				if self.slider and input.UserInputType.Name == 'MouseMovement' then
 					self.slider:SetValue(self.slider.min + ((input.Position.X - self.slider.slider.AbsolutePosition.X) / self.slider.slider.AbsoluteSize.X) * (self.slider.max - self.slider.min))
 				end
 			end
@@ -3202,7 +3204,7 @@ do
 
 		local configData = readFileAndDecodeIt(library.foldername .. '/' .. library.fileext)
 
-		if (configData) then
+		if configData then
 			library.configVars = configData
 			library:LoadConfig(configData.config)
 
@@ -3215,7 +3217,7 @@ do
 
 		self:selectTab(self.tabs[1])
 
-		if (not silent) then
+		if not silent then
 			self:Close()
 		else
 			self.open = false
@@ -3227,7 +3229,7 @@ do
 	end
 
 	function library:SetTitle(text)
-		if (not self.titleLabel) then
+		if not self.titleLabel then
 			return
 		end
 
@@ -3254,7 +3256,7 @@ do
 			local configName = text == 'create' and library.flags.configName or library.flags.configList
 			local trimedValue = configName:gsub('%s', '')
 
-			if (trimedValue == '') then
+			if trimedValue == '' then
 				library:ShowMessage(string.format('Can not %s a config with no name !', text))
 				return false
 			end
@@ -3274,7 +3276,7 @@ do
 			maid:Destroy()
 		end)
 
-		local settingsTab = library:AddTab('Settings', 100)
+		local settingsTab = library:AddTab('Settings', 5)
 		local settingsColumn = settingsTab:AddColumn()
 		local settingsColumn1 = settingsTab:AddColumn()
 		local settingsMain = settingsColumn:AddSection('Main')
@@ -3343,7 +3345,7 @@ do
 			flag = 'Menu Accent Color',
 			color = Color3.fromRGB(255, 227, 0),
 			callback = function(Color)
-				if (library.currentTab) then
+				if library.currentTab then
 					library.currentTab.button.TextColor3 = Color
 				end
 
@@ -3358,7 +3360,7 @@ do
 			flag = 'UI Background',
 			values = {'Floral', 'Flowers', 'Circles', 'Hearts'},
 			callback = function(Value)
-				if (Backgrounds[Value]) then
+				if Backgrounds[Value] then
 					library.main.Image = 'rbxassetid://' .. Backgrounds[Value]
 				end
 			end
@@ -3393,11 +3395,11 @@ do
 			local files = {}
 
 			for _, v in next, listfiles('ChocolateHub/configs') do
-				if (not isfolder(v)) then continue end
+				if not isfolder(v) then continue end
 
 				for _, v2 in next, listfiles(v) do
 					local configName = v2:match('(%w+).config.json')
-					if (not configName) then continue end
+					if not configName then continue end
 
 					local folderName = v:match('configs\\(%w+)')
 					local fullConfigName = string.format('%s - %s', folderName, configName)
@@ -3430,7 +3432,7 @@ do
 		configSection:AddButton({
 			text = 'Create',
 			callback = function()
-				if (showBasePrompt('create')) then
+				if showBasePrompt('create') then
 					library.options.configList:AddValue(library.flags.configName)
 					library.options.configList:SetValue(library.flags.configName)
 					library:SaveConfig(library.flags.configName)
@@ -3457,14 +3459,14 @@ do
 		configSection:AddButton({
 			text = 'Save',
 			callback = function()
-				if (showBasePrompt('save')) then
+				if showBasePrompt('save') then
 					library:SaveConfig(library.flags.configList)
 				end
 			end
 		}):AddButton({
 			text = 'Load',
 			callback = function()
-				if (showBasePrompt('load')) then
+				if showBasePrompt('load') then
 					library:UpdateConfig()
 					library:LoadConfig(library.flags.configList)
 				end
@@ -3472,11 +3474,11 @@ do
 		}):AddButton({
 			text = 'Delete',
 			callback = function()
-				if (showBasePrompt('delete')) then
+				if showBasePrompt('delete') then
 					local Config = library.flags.configList
 					local configFilePath = library.foldername .. '/' .. Config .. '.config' .. library.fileext
 
-					if (table.find(library:GetConfigs(), Config) and isfile(configFilePath)) then
+					if table.find(library:GetConfigs(), Config) and isfile(configFilePath) then
 						library.options.configList:RemoveValue(Config)
 						delfile(configFilePath)
 					end
@@ -3493,14 +3495,14 @@ do
 		configSection:AddButton({
 			text = 'Load From',
 			callback = function()
-				if (not showBasePrompt('load from')) then return end
-				if (isGlobalConfigOn) then return library:ShowMessage('You can not load a config from another user if you are in global config mode.') end
+				if not showBasePrompt('load from') then return end
+				if isGlobalConfigOn then return library:ShowMessage('You can not load a config from another user if you are in global config mode.') end
 
 				local folderName, configName = library.flags.loadFromList:match('(%w+) %p (.+)')
 				local fullConfigName = string.format('%s.config.json', configName)
 
-				if (isfile(library.foldername .. '/' .. fullConfigName)) then
-					if (not library:ShowConfirm('There is already a config with this name in your config folder. Would you like to delete it? Pressing no will cancel the operation')) then
+				if isfile(library.foldername .. '/' .. fullConfigName) then
+					if not library:ShowConfirm('There is already a config with this name in your config folder. Would you like to delete it? Pressing no will cancel the operation') then
 						return
 					end
 				end
@@ -3517,7 +3519,7 @@ do
 			state = true,
 			flag = 'saveConfigAuto',
 			callback = function(toggle)
-				if (not toggle) then
+				if not toggle then
 					maid.saveConfigAuto = nil
 					library:UpdateConfig()
 					return
@@ -3533,7 +3535,7 @@ do
 		})
 
 		local function saveConfigBeforeGameLeave()
-			if (not library.flags.saveconfigauto) then return end
+			if not library.flags.saveconfigauto then return end
 			library:UpdateConfig()
 		end
 
@@ -3542,7 +3544,7 @@ do
 		library.unloadMaid:GiveTask(GuiService.MenuOpened:Connect(saveConfigBeforeGameLeave))
 
 		library.unloadMaid:GiveTask(localPlayer.OnTeleport:Connect(function(state)
-			if (state ~= Enum.TeleportState.Started and state ~= Enum.TeleportState.RequestedFromServer) then return end
+			if state ~= Enum.TeleportState.Started and state ~= Enum.TeleportState.RequestedFromServer then return end
 			saveConfigBeforeGameLeave()
 		end))
 
