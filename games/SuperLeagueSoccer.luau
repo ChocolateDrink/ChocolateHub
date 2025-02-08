@@ -197,9 +197,16 @@ do -- funcs
 		end
 	end
 
-	function funcs.noDiveDelay(t)
-		local func = debug.getupvalue(main.leapAction.BindActionToController, 7)
-		debug.setconstant(func, 35, t and 0 or 0.7)
+	--function funcs.noDiveDelay(t)
+	--	local func = debug.getupvalue(main.leapAction.BindActionToController, 7)
+	--	debug.setconstant(func, 35, t and 0 or 0.7)
+	--end
+
+	function funcs.noDiveDelay()
+		while (library.flags.noDiveDelay) do
+			getrenv()._G.Leaping = false
+			task.wait()
+		end
 	end
 
 	function funcs.changeTeam(team)
