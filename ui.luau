@@ -3276,7 +3276,7 @@ do
 			maid:Destroy()
 		end)
 
-		local settingsTab = library:AddTab('Settings', 5)
+		local settingsTab = library:AddTab('Settings', 900)
 		local settingsColumn = settingsTab:AddColumn()
 		local settingsColumn1 = settingsTab:AddColumn()
 		local settingsMain = settingsColumn:AddSection('Main')
