@@ -1,3 +1,3 @@
-local tab = library:AddTab('Aiming', 4)
+local tab = library:AddTab('Aiming', 700)
 local left, right = tab:AddColumn(), tab:AddColumn()
 
