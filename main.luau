@@ -59,8 +59,8 @@ end
 
 library.funcs = {}
 fetch('games/core/Visuals')
-fetch('games/core/Universal')
 fetch('games/core/Aiming')
+fetch('games/core/Universal')
 
 library:Init()
 
