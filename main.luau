@@ -17,7 +17,7 @@ _G.sigFix = table.find(shitGames, getShortName(gameName or 'Universal'))
 local library = fetch('ui')
 
 local formatted = formatName(gameName and (gameName:sub(1, 2) == '__' and gameName:sub(3) or gameName) or 'Universal')
-local title = (gameName:len() < 5 and gameName or formatted)
+local title = gameName and (gameName:len() < 5 and gameName or formatted) or formatted
 
 library.title = library.title .. ' | ' .. title
 library.gameName = gameName
@@ -58,8 +58,8 @@ if gameName then
 end
 
 library.funcs = {}
-fetch('games/core/Universal')
 fetch('games/core/Visuals')
+fetch('games/core/Universal')
 fetch('games/core/Aiming')
 
 library:Init()
