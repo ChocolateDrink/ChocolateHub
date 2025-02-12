@@ -1,2 +1,2 @@
-local tab = library:AddTab('Universal', 300)
+local tab = library:AddTab('Universal', 700)
 local left, right = tab:AddColumn(), tab:AddColumn()
