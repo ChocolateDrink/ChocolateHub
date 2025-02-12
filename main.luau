@@ -10,22 +10,28 @@ local httpService = Service:Get('HttpService')
 local games = httpService:JSONDecode(fetch('games', true))
 local gameName = games[tostring(game.GameId)]
 
-if not gameName then
-	warn('[script] no script made for this game')
-	return
-end
-
 -- // these games require signal fix
-local shitGames = {'sls', 'cb'}
-_G.sigFix = table.find(shitGames, getShortName(gameName))
+local shitGames = {'sls'}
+_G.sigFix = table.find(shitGames, getShortName(gameName or 'Universal'))
 
 local library = fetch('ui')
 
-do -- game loader
-	library.title = library.title .. ' | ' .. formatStr(gameName:sub(1, 2) == '__' and gameName:sub(3) or gameName)
-	library.gameName = gameName
+local formatted = formatName(gameName and (gameName:sub(1, 2) == '__' and gameName:sub(3) or gameName) or 'Universal')
+local title = (gameName:len() < 5 and gameName or formatted)
+
+library.title = library.title .. ' | ' .. title
+library.gameName = gameName
+
+if gameName then
+	local tab = library:AddTab(gameName, 1)
+	library.sides = {
+		tab:AddColumn(),
+		tab:AddColumn()
+	}
 
 	if gameName:sub(1, 2) == '__' then
+		printf('fetching private script')
+
 		local func, err = loadstring(readfile('ChocolateHub/scripts/' .. gameName:sub(3) .. '.luau'))
 		if not func then
 			warn('[script] an error occured when loading private script:', err)
@@ -35,6 +41,8 @@ do -- game loader
 		func()
 	else
 		if isfile('ChocolateHub/scripts/' .. gameName .. '.luau') then
+			printf('fetching public script from local file')
+
 			local func, err = loadstring(readfile('ChocolateHub/scripts/' .. gameName .. '.luau'))
 			if not func then
 				warn('[script] an error occured when loading script:', err)
@@ -43,10 +51,16 @@ do -- game loader
 
 			func()
 		else
+			printf('fetching public script from server')
 			fetch('games/' .. gameName)
 		end
 	end
 end
+
+library.funcs = {}
+fetch('games/core/Universal')
+fetch('games/core/Visuals')
+fetch('games/core/Aiming')
 
 library:Init()
 
