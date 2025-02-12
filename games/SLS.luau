@@ -1,6 +1,3 @@
-local main = library:AddTab('Main')
-local main1, main2 = main:AddColumn(), main:AddColumn()
-
 local Service = fetch('classes/Service')
 local Maid = fetch('classes/Maid')
 
@@ -45,6 +42,12 @@ do -- main
 	maid.ballAuraPart.Material = Enum.Material.ForceField
 	maid.ballAuraPart.Color = Color3.fromRGB(255, 0, 0)
 	maid.ballAuraPart.Parent = nil
+
+	function funcs.hideBall()
+		maid.ballAuraPart.Parent = nil
+		maid.ballAuraPart.CFrame = CFrame.new(0, 9e9, 0)
+		maid.ballAuraPart.Size = Vector3.one
+	end
 
 	library.unloadMaid:GiveTask(maid.ballAuraPart)
 end
@@ -162,19 +165,25 @@ do -- funcs
 	function funcs.ballAura(t)
 		while library.flags.ballAura do
 			local root = localPlayer.Character and localPlayer.Character.PrimaryPart
-			if not root then task.wait() continue end
+			if not root then
+				funcs.hideBall()
+				task.wait()
+				continue
+			end
 
 			local ball = workspace.Junk:FindFirstChild('Football')
-			if not ball then task.wait() continue end
+			if not ball then
+				funcs.hideBall()
+				task.wait()
+				continue
+			end
 
 			if library.flags.ballAuraVisuals then
 				maid.ballAuraPart.Parent = camera
 				maid.ballAuraPart.CFrame = root.CFrame
 				maid.ballAuraPart.Size = Vector3.one * library.flags.ballAuraRange
 			else
-				maid.ballAuraPart.Parent = nil
-				maid.ballAuraPart.CFrame = CFrame.new(0, 9e9, 0)
-				maid.ballAuraPart.Size = Vector3.one
+				funcs.hideBall()
 			end
 
 			local mag = (root.CFrame.Position - ball.CFrame.Position).Magnitude
@@ -185,6 +194,8 @@ do -- funcs
 			main.actionService.PerformAction:Fire('PickUpBall', ball, ball:GetAttribute('ReleaseId'))
 			task.wait()
 		end
+
+		funcs.hideBall()
 	end
 
 	function funcs.antiTackle()
@@ -203,7 +214,7 @@ do -- funcs
 	--end
 
 	function funcs.noDiveDelay()
-		while (library.flags.noDiveDelay) do
+		while library.flags.noDiveDelay do
 			getrenv()._G.Leaping = false
 			task.wait()
 		end
@@ -250,9 +261,10 @@ do -- funcs
 end
 
 do -- modules
-	local character = main1:AddSection('Character')
-	local ballRelated = main1:AddSection('Ball Related')
-	local gameplay = main2:AddSection('Gameplay')
+	local left, right = unpack(library.sides)
+	local character = left:AddSection('Character')
+	local ballRelated = left:AddSection('Ball Related')
+	local gameplay = right:AddSection('Gameplay')
 
 	do -- character
 		character:AddToggle({
