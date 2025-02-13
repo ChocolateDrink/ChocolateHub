@@ -55,7 +55,7 @@ getgenv().getShortName = function(str)
 	return buffer:lower()
 end
 
-getgenv().formatStr = function(str)
+getgenv().formatName = function(str)
 	local buffer = ''
 	for i = 1, #str do
 		local char = str:sub(i, i)
