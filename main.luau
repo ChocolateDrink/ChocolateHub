@@ -23,7 +23,7 @@ library.title = library.title .. ' | ' .. title
 library.gameName = gameName
 
 if gameName then
-	local tab = library:AddTab(gameName, 1)
+	local tab = library:AddTab('Main', 1)
 	library.sides = {
 		tab:AddColumn(),
 		tab:AddColumn()
