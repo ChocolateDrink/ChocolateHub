@@ -69,7 +69,7 @@ players.LocalPlayer.OnTeleport:Connect(function(state)
 	executed = true
 
 	queue_on_teleport([[
-		loadstring(game:HttpGet('https://raw.githubusercontent.com/ChocolateDrink/ChocolateLine/refs/heads/main/loader.luau'))()
+		loadstring(game:HttpGet('https://raw.githubusercontent.com/ChocolateDrink/ChocolateHub/refs/heads/main/loader.luau'))()
 	]])
 end)
 
