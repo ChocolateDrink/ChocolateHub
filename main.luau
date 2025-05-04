@@ -5,7 +5,7 @@ if not game:IsLoaded() then
 end
 
 local Service = fetch('classes/Service')
-local httpService = Service:Get('HttpService')
+local httpService, players, scriptContext = Service:Get('HttpService', 'Players', 'ScriptContext')
 
 local games = httpService:JSONDecode(fetch('games', true))
 local gameName = games[tostring(game.GameId)]
@@ -30,28 +30,28 @@ if gameName then
 	}
 
 	if gameName:sub(1, 2) == '__' then
-		printf('fetching private script')
+		printf('[main] fetching private script')
 
 		local func, err = loadstring(readfile('ChocolateHub/scripts/' .. gameName:sub(3) .. '.luau'))
 		if not func then
-			warn('[script] an error occured when loading private script:', err)
+			warn('[main] an error occured when loading private script:', err)
 			return
 		end
 
 		func()
 	else
 		if isfile('ChocolateHub/scripts/' .. gameName .. '.luau') then
-			printf('fetching public script from local file')
+			printf('[main] fetching public script from local file')
 
 			local func, err = loadstring(readfile('ChocolateHub/scripts/' .. gameName .. '.luau'))
 			if not func then
-				warn('[script] an error occured when loading script:', err)
+				warn('[main] an error occured when loading script:', err)
 				return
 			end
 
 			func()
 		else
-			printf('fetching public script from server')
+			printf('[main] fetching public script from server')
 			fetch('games/' .. gameName)
 		end
 	end
@@ -62,8 +62,23 @@ fetch('games/core/Visuals')
 fetch('games/core/Aiming')
 fetch('games/core/Universal')
 
+local executed = false
+
+players.LocalPlayer.OnTeleport:Connect(function(state)
+	if executed or state ~= Enum.TeleportState.InProgress then return end
+	executed = true
+
+	queue_on_teleport([[
+		loadstring(game:HttpGet('https://raw.githubusercontent.com/ChocolateDrink/ChocolateLine/refs/heads/main/main.luau'))()
+	]])
+end)
+
+for _, v in next, getconnections(scriptContext.Error) do
+	v:Disable()
+end
+
 library:Init()
 
-printf('[script] loaded in %.02f seconds', tick() - started)
+printf('[main] loaded in %.02f seconds', tick() - started)
 
 _G.debug = false
