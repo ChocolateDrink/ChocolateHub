@@ -67,12 +67,12 @@ _G.tpString = [[
 	loadstring(game:HttpGet('https://raw.githubusercontent.com/ChocolateDrink/ChocolateHub/refs/heads/main/loader.luau'))()
 ]]
 
-players.LocalPlayer.OnTeleport:Connect(function(state)
+library.unloadMaid:GiveTask(players.LocalPlayer.OnTeleport:Connect(function(state)
 	if executed or state ~= Enum.TeleportState.InProgress then return end
 	executed = true
 
 	queue_on_teleport(_G.tpString)
-end)
+end))
 
 for _, v in next, getconnections(scriptContext.Error) do
 	v:Disable()
