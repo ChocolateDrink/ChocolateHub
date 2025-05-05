@@ -21,7 +21,11 @@ do -- main
 	local controllers = localPlayer.PlayerScripts.Client.Controllers
 	local knit = require(repoStore.Packages.Knit)
 
+	local animations = repoStore.Assets.Animations
+
 	main = {
+		animations = animations,
+
 		leapAction = require(controllers.Action.Leap),
 
 		actionService = knit.GetService('ActionService'),
@@ -208,19 +212,12 @@ do -- funcs
 		end
 	end
 
-	--function funcs.noDiveDelay(t)
-	--	local func = debug.getupvalue(main.leapAction.BindActionToController, 7)
-	--	debug.setconstant(func, 35, t and 0 or 0.7)
-	--end
-
-	function funcs.noDiveDelay()
-		while library.flags.noDiveDelay do
-			getrenv()._G.Leaping = false
-			task.wait()
-		end
+	function funcs.noDiveDelay(t)
+		local func = debug.getupvalue(main.leapAction.BindActionToController, 7)
+		debug.setconstant(func, 35, t and 0 or 0.7)
 	end
 
-	function funcs.changeTeam(team)
+	function funcs.changeTeam()
 		if not localPlayer:GetAttribute('TeamPosition') then return end
 		localPlayer:SetAttribute('TeamPosition', library.flags.positionChooser)
 	end
@@ -262,72 +259,62 @@ end
 
 do -- modules
 	local left, right = unpack(library.sides)
-	local character = left:AddSection('Character')
-	local ballRelated = left:AddSection('Ball Related')
-	local gameplay = right:AddSection('Gameplay')
+	local ballRelated = right:AddSection('Ball Related')
+	local gameplay = left:AddSection('Gameplay')
 
-	do -- character
-		character:AddToggle({
-			text = 'Speed',
-			callback = funcs.speed
-		}):AddBind({
-			flag = 'speed bind',
-			callback = function()
-				library.options.speed:SetState(not library.flags.speed)
-			end
+	do -- gameplay
+		gameplay:AddToggle({
+			text = 'Ball Aura',
+			tip = 'instantly get the ball when its close to you',
+			callback = funcs.ballAura
 		})
 
-		character:AddSlider({
-			text = 'Speed Velocity',
-			textpos = 2,
-			max = 350,
-			min = 20,
-			value = 100
-		})
-
-		character:AddToggle({
-			text = 'Fly',
-			callback = funcs.fly
-		}):AddBind({
-			flag = 'fly bind',
-			callback = function()
-				library.options.fly:SetState(not library.flags.fly)
-			end
-		})
-
-		character:AddSlider({
-			text = 'Fly Velocity',
-			textpos = 2,
-			max = 350,
-			min = 20,
-			value = 124
-		})
-
-		character:AddToggle({
-			text = 'Spin Bot',
-			callback = funcs.spinBot
-		}):AddBind({
-			flag = 'spin bot bind',
-			callback = function()
-				library.options.spinBot:SetState(not library.flags.spinBot)
-			end
-		})
-
-		character:AddSlider({
-			text = 'Spin Speed',
-			textpos = 2,
-			max = 120,
+		gameplay:AddSlider({
+			text = 'range',
+			flag = 'ball aura range',
 			min = 10,
-			value = 80
+			max = 50,
+			value = 20
 		})
 
-		character:AddDivider()
+		gameplay:AddToggle({
+			text = 'Visualizer',
+			flag = 'ball aura visuals',
+			state = true
+		})
 
-		character:AddToggle({
+		gameplay:AddDivider()
+
+		gameplay:AddToggle({
+			text = 'Anti Tackle',
+			tip = 'makes it harder for people to tackle you',
+			callback = funcs.antiTackle
+		})
+
+		gameplay:AddToggle({
+			text = 'No Dive Delay',
+			tip = 'removes the goal keeper dive delay',
+			callback = funcs.noDiveDelay
+		})
+
+		gameplay:AddDivider()
+
+		gameplay:AddList({
+			text = 'Position Chooser',
+			tip = 'use the keybind to change your team',
+			values = { 'GK', 'CF', 'LF', 'RF', 'CM', 'LB', 'RB' }
+		}):AddBind({
+			flag = 'position chooser bind',
+			callback = funcs.changeTeam
+		})
+
+		gameplay:AddDivider()
+
+		gameplay:AddToggle({
 			text = 'Infinite Stamina'
 		})
 
-		character:AddToggle({
+		gameplay:AddToggle({
 			text = 'Keep Sprint',
 			callback = funcs.keepSprint
 		})
@@ -385,52 +372,5 @@ do -- modules
 		--	flag = 'shoot ball t p',
 		--	tip = 'teleports the ball into the opposing team\'s goal post'
 		--})
-	end
-
-	do -- gameplay
-		gameplay:AddToggle({
-			text = 'Ball Aura',
-			tip = 'instantly get the ball when its close to you',
-			callback = funcs.ballAura
-		})
-
-		gameplay:AddSlider({
-			text = 'range',
-			flag = 'ball aura range',
-			min = 10,
-			max = 50,
-			value = 20
-		})
-
-		gameplay:AddToggle({
-			text = 'Visualizer',
-			flag = 'ball aura visuals',
-			state = true
-		})
-
-		gameplay:AddDivider()
-
-		gameplay:AddToggle({
-			text = 'Anti Tackle',
-			tip = 'makes it harder for people to tackle you',
-			callback = funcs.antiTackle
-		})
-
-		gameplay:AddToggle({
-			text = 'No Dive Delay',
-			tip = 'removes the goal keeper dive delay',
-			callback = funcs.noDiveDelay
-		})
-
-		gameplay:AddDivider()
-
-		gameplay:AddList({
-			text = 'Position Chooser',
-			tip = 'use the keybind to change your team',
-			values = { 'GK', 'CF', 'LF', 'RF', 'CM', 'LB', 'RB' }
-		}):AddBind({
-			flag = 'position chooser bind',
-			callback = funcs.changeTeam
-		})
 	end
 end
