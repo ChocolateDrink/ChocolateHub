@@ -25,6 +25,10 @@ do -- funcs
 			maid.fly = nil
 			maid.flyMover = nil
 			maid.flyPlatform = nil
+
+			local root = entity.getRoot()
+			if root and library.flags.flyMode == 'Velocity' then root.AssemblyLinearVelocity = Vector3.zero end
+
 			return
 		end
 
@@ -97,10 +101,7 @@ do -- funcs
 			if not root or not hum then return end
 
 			if library.flags.speedNoClimb and hum:GetState() == Enum.HumanoidStateType.Climbing then return end
-			if library.flags.speedGroundLock and hum.FloorMaterial == Enum.Material.Air then
-				root.AssemblyLinearVelocity = Vector3.zero
-				return
-			end
+			if library.flags.speedGroundLock and hum.FloorMaterial == Enum.Material.Air then return end
 
 			local newX = hum.MoveDirection.X * library.flags.speedSpeed
 			local newZ = hum.MoveDirection.Z * library.flags.speedSpeed
@@ -181,6 +182,25 @@ do -- funcs
 				end
 			end)
 		end
+	end
+
+	function funcs.unlockCam(t)
+		if not t then
+			if not maid.oldMax or not maid.oldMin then return end
+			localPlayer.CameraMaxZoomDistance = maid.oldMax
+			localPlayer.CameraMinZoomDistance = maid.oldMin
+			return
+		end
+
+		maid.oldMax = localPlayer.CameraMaxZoomDistance
+		maid.oldMin = localPlayer.CameraMinZoomDistance
+
+		localPlayer.CameraMaxZoomDistance = math.huge
+		localPlayer.CameraMinZoomDistance = 0
+	end
+
+	function funcs.noclipCam(t)
+		localPlayer.DevCameraOcclusionMode = Enum.DevCameraOcclusionMode[t and 'Invisicam' or 'Zoom']
 	end
 
 	library.uniFuncs = funcs
@@ -305,6 +325,18 @@ do -- ui
 			text = 'Instant Reset',
 			flag = 'noclip instant reset',
 			tip = 'Instanly un-noclips you when in character mode.'
+		})
+	end
+
+	local cameraSec = right:AddSection('Camera') do
+		cameraSec:AddToggle({
+			text = 'Unlock Camera',
+			callback = funcs.unlockCam
+		})
+
+		cameraSec:AddToggle({
+			text = 'Noclip Camera',
+			callback = funcs.noclipCam
 		})
 	end
 end
