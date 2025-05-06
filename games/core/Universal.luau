@@ -6,12 +6,14 @@ local Maid = fetch('classes/Maid')
 
 local entity = fetch('utils/entity')
 
-local players, inputService, runService, textChat, repoStore = Service:Get(
+local players, inputService, runService, textChat, repoStore, prompService, lightService = Service:Get(
 	'Players',
 	'UserInputService',
 	'RunService',
 	'TextChatService',
-	'ReplicatedStorage'
+	'ReplicatedStorage',
+	'ProximityPromptService',
+	'Lighting'
 )
 
 local localPlayer = players.LocalPlayer
@@ -205,6 +207,77 @@ do -- funcs
 		localPlayer.DevCameraOcclusionMode = Enum.DevCameraOcclusionMode[t and 'Invisicam' or 'Zoom']
 	end
 
+	function funcs.noFog(t)
+		if not t then
+			maid.noFog = nil
+
+			if not maid.oldFogEnd then return end
+			lightService.FogEnd = 10e4
+
+			return
+		end
+
+		maid.oldFogEnd = lightService.FogEnd
+
+		maid.noFog = runService.RenderStepped:Connect(function()
+			lightService.FogEnd = 10e4
+
+			for _, v in next, lightService:GetChildren() do
+				if not v:IsA('Atmosphere') then continue end
+				v.Density = 0
+			end
+		end)
+	end
+
+	function funcs.fullBright(t)
+		if not t then
+			maid.fullBright = nil
+
+			if not maid.oldBrightness then return end
+			lightService.Brightness = maid.oldBrightness
+			lightService.ClockTime = maid.oldClockTime
+			lightService.GlobalShadows = maid.oldGlobalShadows
+			lightService.OutdoorAmbient = maid.oldOutdoorAmbient
+
+			maid.oldBrightness = nil
+			maid.oldClockTime = nil
+			maid.oldGlobalShadows = nil
+			maid.oldOutdoorAmbient = nil
+			return
+		end
+
+		maid.oldBrightness = lightService.Brightness
+		maid.oldClockTime = lightService.ClockTime
+		maid.oldGlobalShadows = lightService.GlobalShadows
+		maid.oldOutdoorAmbient = lightService.OutdoorAmbient
+
+		maid.fullBright = runService.RenderStepped:Connect(function()
+			lightService.Brightness = 2
+			lightService.ClockTime = 14
+			lightService.GlobalShadows = false
+			lightService.OutdoorAmbient = Color3.new(0.5, 0.5, 0.5)
+		end)
+	end
+
+	function funcs.StreamCam(t)
+		if not workspace.StreamingEnabled then
+			library.options.streamAura:SetState(false)
+			return
+		end
+
+		if not t then
+			maid.streamCam = nil
+			return
+		end
+
+		maid.streamCam = task.spawn(function()
+			while true do
+				localPlayer:RequestStreamAroundAsync(camera.CFrame.Position)
+				task.wait(1)
+			end
+		end)
+	end
+
 	do -- chat spammer
 		function funcs.spamChat()
 			while library.flags.chatSpam do
@@ -239,6 +312,15 @@ do -- funcs
 
 			library.options.chatSpamMessage:RemoveValue(library.flags.chatSpamMessage)
 		end
+	end
+
+	function funcs.instaPP(t)
+		if not t then
+			maid.instaPP = nil
+			return
+		end
+
+		maid.instaPP = prompService.PromptButtonHoldBegan:Connect(fireproximityprompt)
 	end
 
 	library.uniFuncs = funcs
@@ -366,15 +448,31 @@ do -- ui
 		})
 	end
 
-	local cameraSec = right:AddSection('Camera') do
-		cameraSec:AddToggle({
+	local cam = right:AddSection('Camera') do
+		cam:AddToggle({
 			text = 'Unlock Camera',
 			callback = funcs.unlockCam
 		})
 
-		cameraSec:AddToggle({
+		cam:AddToggle({
 			text = 'Noclip Camera',
 			callback = funcs.noclipCam
+		})
+
+		cam:AddToggle({
+			text = 'No Fog',
+			callback = funcs.noFog
+		})
+
+		cam:AddToggle({
+			text = 'Full Bright',
+			callback = funcs.fullBright
+		})
+
+		cam:AddToggle({
+			text = 'Stream Aura',
+			tip = 'Constantly loads areas around your camera if the game has StreamingEnabled enabled.',
+			callback = funcs.StreamCam
 		})
 	end
 
@@ -419,5 +517,12 @@ do -- ui
 		--	flag = 'chat spam bypass',
 		--	tip = 'Bypasses the chat filter, account language has to be set to Қазақ Тілі.'
 		--})
+	end
+
+	local misc = right:AddSection('Misc') do
+		misc:AddToggle({
+			text = 'Instant Prox Promts',
+			callback = funcs.instaPP
+		})
 	end
 end
