@@ -169,5 +169,10 @@ do -- ui
 			text = 'Unlock Tracers',
 			flag = 'esp unloack traces'
 		})
+
+		espCustomization:AddToggle({
+			text = 'Show Teammates',
+			flag = 'esp show team'
+		})
 	end
 end

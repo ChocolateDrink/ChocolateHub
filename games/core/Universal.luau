@@ -6,10 +6,12 @@ local Maid = fetch('classes/Maid')
 
 local entity = fetch('utils/entity')
 
-local players, inputService, runService = Service:Get(
+local players, inputService, runService, textChat, repoStore = Service:Get(
 	'Players',
 	'UserInputService',
-	'RunService'
+	'RunService',
+	'TextChatService',
+	'ReplicatedStorage'
 )
 
 local localPlayer = players.LocalPlayer
@@ -203,6 +205,42 @@ do -- funcs
 		localPlayer.DevCameraOcclusionMode = Enum.DevCameraOcclusionMode[t and 'Invisicam' or 'Zoom']
 	end
 
+	do -- chat spammer
+		function funcs.spamChat()
+			while library.flags.chatSpam do
+				if textChat.ChatVersion == Enum.ChatVersion.TextChatService then
+					textChat.TextChannels.RBXGeneral:SendAsync(library.flags.chatSpamMessage)
+				else
+					repoStore.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(library.flags.chatSpamMessage, 'All')
+				end
+
+				task.wait(library.flags.chatSpamDelay)
+			end
+		end
+
+		function funcs.spamChatAdd()
+			if library.flags.chatSpamTempMessage == '' then
+				return
+			end
+
+			if table.find(library.options.chatSpamMessage.values, library.flags.chatSpamTempMessage) then
+				return
+			end
+
+			library.options.chatSpamMessage:AddValue(library.flags.chatSpamTempMessage)
+			library.options.chatSpamMessage:SetValue(library.flags.chatSpamTempMessage, true)
+			library.options.chatSpamTempMessage:SetValue('')
+		end
+
+		function funcs.spamChatRemove()
+			if library.flags.chatSpamMessage == '' then
+				return
+			end
+
+			library.options.chatSpamMessage:RemoveValue(library.flags.chatSpamMessage)
+		end
+	end
+
 	library.uniFuncs = funcs
 end
 
@@ -338,5 +376,48 @@ do -- ui
 			text = 'Noclip Camera',
 			callback = funcs.noclipCam
 		})
+	end
+
+	local chatSpam = left:AddSection('Chat Spammer') do
+		chatSpam:AddToggle({
+			text = 'Enabled',
+			flag = 'chat spam',
+			callback = funcs.spamChat
+		})
+
+		chatSpam:AddDivider()
+
+		chatSpam:AddList({
+			text = 'Messages',
+			flag = 'chat spam message'
+		})
+
+		chatSpam:AddSlider({
+			text = 'Delay',
+			flag = 'chat spam delay',
+			min = 0,
+			max = 10,
+			float = 0.1,
+			value = 1.5
+		})
+
+		chatSpam:AddBox({
+			text = 'Message',
+			flag = 'chat spam temp message'
+		})
+
+		chatSpam:AddButton({
+			text = 'Add Message',
+			callback = funcs.spamChatAdd
+		}):AddButton({
+			text = 'Remove Message',
+			callback = funcs.spamChatRemove
+		})
+
+		--chatSpam:AddToggle({
+		--	text = 'Filter Bypass',
+		--	flag = 'chat spam bypass',
+		--	tip = 'Bypasses the chat filter, account language has to be set to Қазақ Тілі.'
+		--})
 	end
 end
