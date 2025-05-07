@@ -11,7 +11,7 @@ local games = httpService:JSONDecode(fetch('games', true))
 local gameName = games[tostring(game.GameId)]
 
 -- // these games require signal fix
-local shitGames = {'sls'}
+local shitGames = {'sls', 'pe'}
 _G.sigFix = table.find(shitGames, getShortName(gameName or 'Universal'))
 
 local library = fetch('ui')
