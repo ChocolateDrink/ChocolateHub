@@ -363,8 +363,8 @@ do -- funcs
 					clone = clone:Clone()
 					clone.Parent = newChat
 
-					clone.BodyText.Text = string.format('<font transparency=\'1.0\' family=\'rbxasset://fonts/families/SourceSansPro.json\' weight=\'Bold\' size=\'18\'><stroke transparency=\'1.0\'><font color="#b480ff">%s:</font></stroke></font> %s', library.flags.fakeChatPlayer.Name or '', library.flags.fakeChatMessage)
-					clone.PrefixText.Text = string.format('<font color="#b480ff">%s:</font>', library.flags.fakeChatPlayer.Name or '')
+					clone.TextMessage.BodyText.Text = string.format('<font transparency=\'1.0\' family=\'rbxasset://fonts/families/SourceSansPro.json\' weight=\'Bold\' size=\'18\'><stroke transparency=\'1.0\'><font color="#b480ff">%s:</font></stroke></font> %s', library.flags.fakeChatPlayer.Name or '', library.flags.fakeChatMessage)
+					clone.TextMessage.PrefixText.Text = string.format('<font color="#b480ff">%s:</font>', library.flags.fakeChatPlayer.Name or '')
 				else
 					local clone = getOld()
 					if not clone then return end
@@ -594,7 +594,8 @@ do -- ui
 		fakeChat:AddList({
 			text = 'Chatter',
 			flag = 'fake chat player',
-			playerOnly = true
+			playerOnly = true,
+			noload = true
 		})
 
 		fakeChat:AddBox({
