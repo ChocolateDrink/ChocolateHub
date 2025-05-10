@@ -356,7 +356,7 @@ do -- funcs
 					clone.Parent = oldChat
 
 					clone.TextLabel.Text = string.format('<font dir="ltr">%s</font>%s', string.rep(' ', 49), library.flags.fakeChatMessage)
-					clone.TextLabel.TextButton.Text = string.format('[%s]:', library.flags.fakeChatChatter)
+					clone.TextLabel.TextButton.Text = string.format('[%s]:', library.flags.fakeChatPlayer)
 				end
 			end
 		end
