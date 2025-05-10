@@ -344,10 +344,27 @@ do -- funcs
 			end
 		end
 
+		local function getNew()
+			for _, v in next, newChat:GetChildren() do
+				if not v:IsA('Frame') then continue end
+				if not v.Name:find('-{') then continue end
+				if #v:GetDescendants() ~= 6 then continue end
+
+				return v
+			end
+		end
+
 		function funcs.fakeChat()
 			for _ = 1, library.flags.fakeChatNum do
 				if textChat.ChatVersion == Enum.ChatVersion.TextChatService then
+					local clone = getNew()
+					if not clone then return end
 
+					clone = clone:Clone()
+					clone.Parent = newChat
+
+					clone.BodyText.Text = string.format('<font transparency=\'1.0\' family=\'rbxasset://fonts/families/SourceSansPro.json\' weight=\'Bold\' size=\'18\'><stroke transparency=\'1.0\'><font color="#b480ff">%s:</font></stroke></font> %s', library.flags.fakeChatPlayer.Name or '', library.flags.fakeChatMessage)
+					clone.PrefixText.Text = string.format('<font color="#b480ff">%s:</font>', library.flags.fakeChatPlayer.Name or '')
 				else
 					local clone = getOld()
 					if not clone then return end
@@ -355,7 +372,7 @@ do -- funcs
 					clone = clone:Clone()
 					clone.Parent = oldChat
 
-					clone.TextLabel.Text = string.format('<font dir="ltr">%s</font>%s', string.rep(' ', 49), library.flags.fakeChatMessage)
+					clone.TextLabel.Text = string.format('<font dir="ltr">[%s]:  </font>%s', library.flags.fakeChatPlayer.Name or '', library.flags.fakeChatMessage)
 					clone.TextLabel.TextButton.Text = string.format('[%s]:', library.flags.fakeChatPlayer.Name or '')
 				end
 			end
@@ -577,8 +594,7 @@ do -- ui
 		fakeChat:AddList({
 			text = 'Chatter',
 			flag = 'fake chat player',
-			playerOnly = true,
-			noload = true
+			playerOnly = true
 		})
 
 		fakeChat:AddBox({
