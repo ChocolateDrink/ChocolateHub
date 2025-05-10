@@ -6,14 +6,15 @@ local Maid = fetch('classes/Maid')
 
 local entity = fetch('utils/entity')
 
-local players, inputService, runService, textChat, repoStore, prompService, lightService = Service:Get(
+local players, inputService, runService, textChat, repoStore, prompService, lightService, coreUI = Service:Get(
 	'Players',
 	'UserInputService',
 	'RunService',
 	'TextChatService',
 	'ReplicatedStorage',
 	'ProximityPromptService',
-	'Lighting'
+	'Lighting',
+	'CoreGui'
 )
 
 local localPlayer = players.LocalPlayer
@@ -323,6 +324,44 @@ do -- funcs
 		maid.instaPP = prompService.PromptButtonHoldBegan:Connect(fireproximityprompt)
 	end
 
+	do -- fake chat
+		local newChat, oldChat
+		pcall(function()
+			newChat = coreUI.ExperienceChat.appLayout.chatWindow.scrollingView.bottomLockedScrollView.RCTScrollView.RCTScrollContentView
+		end)
+
+		pcall(function()
+			oldChat = localPlayer.PlayerGui.Chat.Frame.ChatChannelParentFrame.Frame_MessageLogDisplay.Scroller
+		end)
+
+		local function getOld()
+			for _, v in next, oldChat:GetChildren() do
+				if not v:IsA('Frame') then continue end
+				if #v:GetDescendants() ~= 2 then continue end
+				if v.Name ~= 'Frame' then continue end
+
+				return v
+			end
+		end
+
+		function funcs.fakeChat()
+			for _ = 1, library.flags.fakeChatNum do
+				if textChat.ChatVersion == Enum.ChatVersion.TextChatService then
+
+				else
+					local clone = getOld()
+					if not clone then return end
+
+					clone = clone:Clone()
+					clone.Parent = oldChat
+
+					clone.TextLabel.Text = string.format('<font dir="ltr">%s</font>%s', string.rep(' ', 49), library.flags.fakeChatMessage)
+					clone.TextLabel.TextButton.Text = string.format('[%s]:', library.flags.fakeChatChatter)
+				end
+			end
+		end
+	end
+
 	library.uniFuncs = funcs
 end
 
@@ -517,6 +556,35 @@ do -- ui
 		--	flag = 'chat spam bypass',
 		--	tip = 'Bypasses the chat filter, account language has to be set to Қазақ Тілі.'
 		--})
+	end
+
+	local fakeChat = right:AddSection('Fake Chat') do
+		fakeChat:AddButton({
+			text = 'Fake Chat',
+			tip = 'Frame someone for saying something bad.',
+			callback = funcs.fakeChat
+		})
+
+		fakeChat:AddSlider({
+			text = 'Messages Sent',
+			flag = 'fake chat num',
+			tip = 'The number of messages that are sent.',
+			min = 1,
+			max = 30,
+			value = 10
+		})
+
+		fakeChat:AddList({
+			text = 'Chatter',
+			flag = 'fake chat player',
+			playerOnly = true,
+			noload = true
+		})
+
+		fakeChat:AddBox({
+			text = 'Message',
+			flag = 'fake chat message'
+		})
 	end
 
 	local misc = right:AddSection('Misc') do
